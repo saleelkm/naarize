@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Clickable NAARIZE prototype: onboarding to Home, built from the designer manual.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 30 30%27%3E%3Ccircle cx=%2715%27 cy=%2715%27 r=%2714%27 fill=%27%231D5C57%27/%3E%3Ccircle cx=%2715%27 cy=%2715%27 r=%276%27 fill=%27none%27 stroke=%27%23F2B544%27 stroke-width=%272.4%27/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>NAARIZE Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: the phone sits left, a narrow control rail sits right; they stack on narrow screens.
+   Page chrome follows the viewer's theme. The app inside the phone keeps one light look on purpose. */
+:root{
+  --bg:#E4EAE8;--panel:#FFFFFF;--fg:#17201F;--mut:#53605D;--line:#D0D9D6;--acc:#1D5C57;--acc-fg:#FFFFFF;--soft:#E7EFED;--bezel:#0E1413;
+  --f:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1312;--panel:#151E1D;--fg:#E4ECEA;--mut:#9DAEAA;--line:#2A3735;--acc:#7CC2B7;--acc-fg:#0D1312;--soft:#1C2826;--bezel:#000000;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D1312;--panel:#151E1D;--fg:#E4ECEA;--mut:#9DAEAA;--line:#2A3735;--acc:#7CC2B7;--acc-fg:#0D1312;--soft:#1C2826;--bezel:#000000;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding-block:24px}
+.dwrap{width:calc(418px * var(--s,1));height:calc(872px * var(--s,1));flex:none}
+.device{width:418px;height:872px;padding:14px;box-sizing:border-box;border-radius:60px;background:var(--bezel);transform:scale(var(--s,1));transform-origin:0 0;box-shadow:0 40px 80px -30px rgba(10,30,28,.45)}
+
+/* ---------- control rail ---------- */
+.panel{flex:1 1 300px;max-width:380px;min-width:0;display:flex;flex-direction:column;gap:20px;padding-top:4px}
+.panel h1{margin:0;font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--mut);font-size:15px;line-height:1.5}
+.ph{margin:0 0 8px;font:500 11px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.plist{display:flex;flex-wrap:wrap;gap:6px}
+.pb{font:600 14px/1.25 var(--f);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:36px;padding:6px 10px;cursor:pointer;text-align:left}
+.pb:hover{border-color:var(--acc)}
+.pb.on{background:var(--acc);border-color:var(--acc);color:var(--acc-fg)}
+.pb[disabled]{opacity:.45;cursor:not-allowed}
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.pgrid .pb{display:flex;flex-direction:column;gap:2px}
+.pb small{font-weight:500;font-size:12px;opacity:.78}
+.ptog{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:2px 12px}
+.trow{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;background:none;border:0;color:var(--fg);cursor:pointer;width:100%;font:500 14px var(--f);text-align:left;padding:0}
+.trow+.trow{border-top:1px solid var(--line)}
+.trow[disabled]{opacity:.45;cursor:not-allowed}
+.psw{width:40px;height:24px;border-radius:12px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.psw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:var(--panel);transition:transform .15s}
+.trow[aria-checked="true"] .psw{background:var(--acc)}
+.trow[aria-checked="true"] .psw::after{transform:translateX(16px)}
+.pact{display:flex;flex-wrap:wrap;gap:6px}
+.pstate{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:13.5px;background:var(--soft);border-radius:12px;padding:12px 14px;margin:0}
+.pstate dt{color:var(--mut);font:500 11px/1.6 var(--mono);text-transform:uppercase;letter-spacing:.06em}
+.pstate dd{margin:0;min-width:0}
+.pnote{font-size:12.5px;color:var(--mut);line-height:1.5;margin:0}
+.panel :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* ---------- the app (fixed light look) ---------- */
+.screen{position:relative;width:390px;height:844px;border-radius:46px;overflow:hidden;background:#F4F6F5;color:#1E2A2A;font-family:var(--f);font-size:16px;line-height:1.45;color-scheme:light}
+.screen *{box-sizing:border-box}
+.screen button,.screen input{font-family:inherit}
+.screen :focus-visible{outline:3px solid #E0A12E;outline-offset:2px}
+#app{position:absolute;inset:0}
+.ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;background:#F4F6F5}
+.body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
+.pad{padding:8px 20px 16px}
+.foot{padding:12px 20px 30px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center}
+.sb{justify-content:space-between}
+.stack{display:flex;flex-direction:column}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.h1{margin:0;font-size:27px;line-height:1.25;font-weight:700;text-wrap:balance}
+.h2{margin:0;font-size:23px;line-height:1.3;font-weight:700;text-wrap:balance}
+.h3{margin:0;font-size:18px;font-weight:700;line-height:1.3}
+.p{margin:0;font-size:16px;line-height:1.5;color:#3C4847}
+.why{margin:0;font-size:15px;line-height:1.45;color:#56615F}
+.mut{color:#56615F}
+.center{text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fl{font-size:15px;font-weight:600}
+.lbl{margin:0;font:700 12px/1.2 var(--f);letter-spacing:.07em;text-transform:uppercase;color:#56615F}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 18px;border-radius:14px;font-weight:600;font-size:17px;line-height:1.2;border:1.5px solid #1D5C57;cursor:pointer;text-align:center;text-decoration:none}
+.btn-p{background:#1D5C57;color:#FFFFFF}
+.btn-p:hover:not([disabled]){background:#174B47}
+.btn-s{background:#FFFFFF;color:#1D5C57}
+.btn-s:hover:not([disabled]){background:#F1F7F6}
+.btn-r{background:#A33A24;border-color:#A33A24;color:#FFFFFF}
+.btn-r:hover{background:#8E2F1C}
+.btn.sm{min-height:46px;font-size:16px;border-radius:12px;padding:0 12px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.tlink{background:none;border:0;padding:0 2px;min-height:44px;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:16px;color:#1D5C57;cursor:pointer;text-decoration:none}
+.tlink[disabled]{color:#56615F;cursor:default}
+.ib0{width:44px;height:44px;border-radius:22px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1E2A2A;padding:0;flex:none}
+.ib1{width:44px;height:44px;border-radius:22px;border:1px solid #DCE3E1;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1E2A2A;padding:0}
+.ib1.on{background:#1D5C57;border-color:#1D5C57;color:#FFFFFF}
+.help{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 14px;border-radius:22px;background:#FBE9E4;color:#8E2F1C;font-weight:700;font-size:15px;border:0;cursor:pointer;flex:none}
+.help:hover{background:#F7DCD4}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 8px}
+.hdr.bb{border-bottom:1px solid #E3E8E7;padding-bottom:10px}
+.prog{flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.seg{height:6px;border-radius:3px;background:#DCE3E1}
+.seg.on{background:#1D5C57}
+.card{background:#FFFFFF;border:1px solid #DCE3E1;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;flex:none}
+.ct{margin:0;font-size:18px;line-height:1.35;font-weight:700}
+.cp{margin:0;font-size:15px;line-height:1.45;color:#3C4847}
+.inp{height:58px;padding:0 16px;border-radius:14px;background:#FFFFFF;border:2px solid #CFD8D6;font-weight:600;font-size:20px;color:#1E2A2A;outline:none;width:100%;min-width:0}
+.inp:focus{border-color:#1D5C57}
+.inp::placeholder{color:#8A9593;font-weight:500}
+.cc{height:58px;padding:0 14px;border-radius:14px;background:#FFFFFF;border:1.5px solid #DCE3E1;display:flex;align-items:center;font-size:19px;font-weight:600;flex:none}
+.brand{font-weight:700;font-size:19px;letter-spacing:.14em}
+.photo{height:232px;border-radius:24px;background:#DDE8E5;border:1.5px dashed #9DB5B0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#3E5552;text-align:center;padding:0 32px;flex:none}
+.photo b{font-size:15px}
+.photo span{font-size:13px}
+.doc{display:flex;align-items:center;gap:14px;padding:12px 16px}
+.avatar{width:52px;height:52px;border-radius:26px;background:#DDE8E5;border:1.5px dashed #9DB5B0;display:flex;align-items:center;justify-content:center;color:#3E5552;flex:none}
+.otp{position:relative}
+.otp-in{position:absolute;inset:0;width:100%;height:100%;opacity:.01;border:0;z-index:2;font-size:16px;cursor:text}
+.otp-boxes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.ob{height:62px;border-radius:14px;background:#FFFFFF;border:1.5px solid #CFD8D6;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700}
+.otp:focus-within .ob.cur{border:2px solid #1D5C57}
+.warn{display:flex;gap:12px;align-items:center;background:#FCF1DB;border-radius:16px;padding:14px 16px;color:#5C4210;font-size:16px}
+.ok-note{display:flex;gap:6px;align-items:center;color:#1D5C57;font-weight:600;font-size:14px}
+.years{position:relative;height:232px;overflow-y:auto;background:#FFFFFF;border:1px solid #DCE3E1;border-radius:16px;padding:6px;display:flex;flex-direction:column;gap:2px;flex:none}
+.yr{min-height:44px;border:0;background:transparent;border-radius:12px;font-size:19px;color:#56615F;cursor:pointer;flex:none}
+.yr:hover{background:#F1F7F6}
+.yr.on{background:#E2EEEC;color:#14423E;font-weight:700;font-size:22px}
+.hr{height:1px;background:#DCE3E1;flex:none}
+.dl{display:grid;grid-template-columns:104px minmax(0,1fr);column-gap:10px;row-gap:7px;margin:0;font-size:15px;line-height:1.4}
+.dl dt{color:#56615F;font-weight:600}
+.dl dd{margin:0}
+.note{margin:0;font-size:14px;line-height:1.45;color:#5C4210;background:#FCF1DB;border-radius:12px;padding:10px 12px}
+.oi{width:44px;height:44px;border-radius:12px;background:#E2EEEC;color:#1D5C57;display:flex;align-items:center;justify-content:center;flex:none}
+.tag{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:10px;padding:4px 8px;background:#E2EEEC;color:#14423E;flex:none}
+.tag.grey{background:#E7EBEA;color:#56615F}
+.ot{margin:0;font-size:17px;font-weight:700;line-height:1.3}
+.od{margin:2px 0 0;font-size:15px;line-height:1.4;color:#56615F}
+.src{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 14px;border-radius:14px;border:1.5px solid #DCE3E1;background:#FFFFFF;font-weight:600;font-size:16px;color:#1E2A2A;text-align:left;cursor:pointer;width:100%}
+.src.on{border-color:#1D5C57;background:#F1F7F6}
+.logo-ph{width:28px;height:28px;border-radius:8px;background:#DDE8E5;border:1px dashed #9DB5B0;flex:none}
+.sw{width:52px;height:30px;border-radius:15px;background:#BFCAC7;border:0;position:relative;cursor:pointer;padding:0;flex:none;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:12px;background:#FFFFFF;transition:transform .15s}
+.sw[aria-checked="true"]{background:#1D5C57}
+.sw[aria-checked="true"]::after{transform:translateX(22px)}
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;font-size:16px}
+.swrow+.swrow{border-top:1px solid #E7EBEA}
+.chip{display:flex;flex-direction:column;gap:3px;justify-content:center;min-height:84px;padding:12px 14px;border-radius:16px;border:1.5px solid #CFD8D6;background:#FFFFFF;text-align:left;cursor:pointer;color:#1E2A2A}
+.chip b{font-size:16px;line-height:1.3}
+.chip small{font-size:14px;color:#56615F;line-height:1.3}
+.chip:hover{border-color:#1D5C57}
+.chip.on{border:2px solid #1D5C57;background:#E2EEEC}
+.chip.more{border-style:dashed}
+.chip.more b{display:flex;align-items:center;gap:4px}
+.inbar{display:flex;align-items:center;gap:4px;background:#FFFFFF;border:1.5px solid #CFD8D6;border-radius:28px;padding:4px 4px 4px 18px}
+.inbar input{flex:1;min-width:0;height:46px;border:0;outline:none;font-size:17px;background:transparent;color:#1E2A2A}
+.ib{width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:#1D5C57;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0}
+.ib.send{background:#1D5C57;color:#FFFFFF}
+.st{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:62px;padding:0 18px;border-radius:16px;border:1.5px solid #1D5C57;background:#FFFFFF;color:#1D5C57;font-weight:700;font-size:18px;line-height:1.3;text-align:left;cursor:pointer;width:100%}
+.st:hover{background:#F1F7F6}
+.st.on{background:#1D5C57;color:#FFFFFF}
+.picked{align-self:flex-start;display:flex;gap:8px;align-items:center;background:#E2EEEC;color:#14423E;border-radius:20px;padding:8px 14px;font-size:15px;font-weight:600}
+.log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:16px 20px 20px}
+.bot{margin:0;background:#FFFFFF;border:1px solid #DCE3E1;border-radius:6px 20px 20px 20px;padding:12px 16px;font-size:17px;line-height:1.45;max-width:310px;align-self:flex-start}
+.me{margin:0;background:#1D5C57;color:#FFFFFF;border-radius:20px 6px 20px 20px;padding:10px 16px;font-size:17px;line-height:1.4;align-self:flex-end;max-width:270px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{min-height:46px;padding:8px 16px;border-radius:23px;border:1.5px solid #1D5C57;background:#FFFFFF;color:#1D5C57;font-weight:600;font-size:16px;line-height:1.3;text-align:left;cursor:pointer}
+.opt:hover{background:#F1F7F6}
+.opt.q{border-color:#B9C4C2;color:#3C4847}
+.qn{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#56615F;margin-top:4px}
+.dot{width:8px;height:8px;border-radius:4px;background:#C9D2D0}
+.dot.on{background:#1D5C57}
+.typing{display:flex;gap:5px;padding:16px 18px}
+.typing span{width:8px;height:8px;border-radius:4px;background:#9DB0AC;animation:blink 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+.inbar2{padding:10px 16px 28px;background:#FFFFFF;border-top:1px solid #E3E8E7;display:flex;align-items:center;gap:6px}
+.inbar2 input{flex:1;min-width:0;height:48px;border-radius:24px;border:1.5px solid #CFD8D6;padding:0 16px;font-size:17px;background:#F4F6F5;color:#1E2A2A;outline:none}
+.inbar2 input:focus{border-color:#1D5C57}
+.rf{background:#FFFFFF;border:2px solid #A33A24;border-radius:20px;overflow:hidden;flex:none}
+.rfh{background:#FBE9E4;padding:12px 16px;display:flex;gap:12px;align-items:center}
+.rfi{width:36px;height:36px;border-radius:18px;background:#A33A24;color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none}
+.rfh h2{margin:0;font-size:17px;line-height:1.3;font-weight:700;color:#6E2414}
+.rfb{padding:12px 16px 8px;display:flex;flex-direction:column;gap:8px}
+.rfb p{margin:0;font-size:15px;line-height:1.45;color:#3C4847}
+.tip{display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.45}
+.num{width:28px;height:28px;border-radius:14px;background:#FCF1DB;color:#7A5410;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex:none}
+.rev{display:flex;align-items:center;gap:8px;font-size:13px;color:#56615F;border-top:1px solid #E7EBEA;padding-top:10px}
+.item.on{border:2px solid #1D5C57}
+.item.off{opacity:.6}
+.said{margin:0;font-size:15px;color:#56615F;font-style:italic}
+.tl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.tl i{height:10px;border-radius:5px;background:#DCE3E1}
+.tl i.on{background:#1D5C57}
+.tlt{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;font-size:12px;line-height:1.25;color:#56615F;text-align:center}
+.tlt .on{color:#14423E;font-weight:700}
+.hh{padding:16px 20px 4px;display:flex;flex-direction:column;gap:10px}
+.dzl{margin:0;font-size:14px;color:#56615F;display:flex;gap:6px;align-items:center}
+.dzl span{width:8px;height:8px;border-radius:4px;background:#1D5C57}
+.hb{padding:10px 20px 18px;gap:12px}
+.stage{background:#E2EEEC;border-color:#E2EEEC}
+.stage .lbl{color:#3E5552}
+.stage .ct{color:#14423E}
+.stage .cp{color:#2F4A47}
+.sub{font-weight:500;color:#3E5552}
+.sth{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stage.sm{padding:10px 14px;gap:6px}
+.stage.sm .ct{font-size:16px}
+.chg{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:12px;background:#FFFFFF;border:1px solid #B9CFCB;color:#1D5C57;font-weight:600;font-size:15px;cursor:pointer;flex:none}
+.att{background:#FCF1DB;border-color:#EFD69B}
+.att .ct,.att .cp{color:#4A3306}
+.atti{width:36px;height:36px;border-radius:18px;background:#F2B544;color:#3D2A05;display:flex;align-items:center;justify-content:center;flex:none}
+.meta{font-size:14px;color:#56615F;margin-top:-4px}
+.ansg{display:grid;gap:8px}
+.ans{min-height:46px;border-radius:12px;border:1.5px solid #CFD8D6;background:#FFFFFF;color:#1E2A2A;font-weight:600;font-size:15px;line-height:1.25;padding:6px 8px;cursor:pointer}
+.ans:hover{border-color:#1D5C57}
+.go{display:flex;align-items:center;gap:8px;min-height:44px;border:0;border-top:1px solid #E7EBEA;background:transparent;padding:6px 0 0;font-weight:600;font-size:15px;color:#1D5C57;cursor:pointer;text-align:left;width:100%}
+.stage .go{border-top-color:#C4D6D2}
+.go b{color:#1E2A2A}
+.pd{display:flex;gap:6px}
+.pd i{width:14px;height:14px;border-radius:7px;background:#DCE3E1}
+.pd i.on{background:#F2B544}
+.ntc{background:#FCF1DB;border-color:#F0DCAA}
+.ntc .lbl,.ntc .pnp{color:#5C4210}
+.ntc .ct{font-size:16px;font-weight:600;line-height:1.45}
+.pnp{margin:0;font-size:13px;font-style:italic}
+.mb{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px}
+.mb i{height:8px;border-radius:4px;background:#C4D6D2}
+.mb i.on{background:#1D5C57}
+.watch{display:flex;align-items:center;gap:12px;background:#F1F7F6;border-radius:14px;padding:10px 12px}
+.strong{border:2px solid #1D5C57}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#FFFFFF;border-top:1px solid #DCE3E1;padding:6px 8px 24px}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;font-weight:600;font-size:13px;color:#56615F;background:none;border:0;cursor:pointer}
+.tab .pill{width:60px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center}
+.tab.on{color:#14423E}
+.tab.on .pill{background:#E2EEEC}
+.big .ct{font-size:20px}
+.big .ans{min-height:54px;font-size:17px}
+.big .cp{font-size:16px}
+.big .h1{font-size:28px}
+.ov{position:absolute;inset:0;background:rgba(18,28,27,.55);border:0;width:100%;padding:0;cursor:pointer;z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:#F4F6F5;border-radius:28px 28px 0 0;padding:10px 20px 30px;display:flex;flex-direction:column;gap:14px;z-index:21;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+.grab{width:44px;height:5px;border-radius:3px;background:#C9D2D0;align-self:center;flex:none}
+.emg{background:#FBE9E4;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.emh{color:#8E2F1C;font-size:16px}
+.call{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;border-radius:14px;background:#A33A24;color:#FFFFFF;font-weight:700;font-size:18px;text-decoration:none}
+.call:hover{background:#8E2F1C;color:#FFFFFF}
+.call small{font-weight:500;font-size:12px}
+.hrow{display:flex;align-items:center;gap:14px;min-height:72px;padding:12px 14px;border-radius:16px;border:1px solid #DCE3E1;background:#FFFFFF;text-align:left;cursor:pointer;width:100%;color:#1E2A2A;text-decoration:none;font-size:16px}
+.hrow:hover{border-color:#1D5C57;color:#1E2A2A}
+.hrow small{font-size:14px}
+.keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:280px;align-self:center}
+.key{min-height:60px;border-radius:30px;border:0;background:#FFFFFF;font-size:24px;font-weight:600;cursor:pointer;box-shadow:inset 0 0 0 1px #DCE3E1;color:#1E2A2A;display:flex;align-items:center;justify-content:center}
+.key:hover{background:#F1F7F6}
+.key.blank{visibility:hidden}
+.pdots{display:flex;gap:14px;justify-content:center}
+.pdots i{width:16px;height:16px;border-radius:8px;border:2px solid #1D5C57}
+.pdots i.on{background:#1D5C57}
+.lock{position:absolute;inset:0;z-index:40;background:#F4F6F5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px 40px}
+.toast{position:absolute;left:20px;right:20px;bottom:104px;z-index:50;background:#1E2A2A;color:#FFFFFF;border-radius:14px;padding:12px 16px;font-size:15px;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.slist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.slist li{display:flex;gap:8px;align-items:flex-start;font-size:15px;line-height:1.4}
+.slist li .ico{color:#1D5C57;margin-top:1px}
+.cyc{display:flex;gap:8px;flex-wrap:wrap}
+.cyc span{background:#E2EEEC;color:#14423E;border-radius:10px;padding:6px 10px;font-weight:700;font-size:15px}
+.art{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;cursor:pointer;width:100%;background:none;border:0;padding:0;min-height:44px;color:#1E2A2A}
+.art .ico{color:#1D5C57}
+.chosen{display:flex;flex-wrap:wrap;gap:8px}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.typing span{animation:none}.sw,.sw::after,.psw,.psw::after{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="dwrap"><div class="device"><div class="screen" id="screen"><div id="app"></div><div class="toast" id="toast" role="status" hidden></div></div></div></div>
+  <aside class="panel" id="panel" aria-label="Prototype controls"></aside>
+</div>
+
+<script>
+const NOW=2026;
+const $=s=>document.querySelector(s);
+const app=$('#app'),panel=$('#panel'),toastEl=$('#toast'),screenEl=$('#screen');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const digits=s=>String(s||'').replace(/\D/g,'');
+
+/* ---------- icons ---------- */
+const I={
+ back:'<path d="M15 18l-6-6 6-6"/>',
+ help:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ eye:'<path d="M3 3l18 18"/><path d="M10.6 6.1A9.7 9.7 0 0112 6c5 0 9 6 9 6a15 15 0 01-3 3.5M6.6 6.6C4.2 8.2 3 12 3 12s4 6 9 6a8.6 8.6 0 004.4-1.2"/>',
+ home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+ chat:'<path d="M4 5h16v11H8l-4 4z"/>',
+ story:'<path d="M6 3h12v18H6z"/><path d="M9 7h6M9 11h6"/>',
+ learn:'<path d="M2 5h7a3 3 0 013 3v12a2 2 0 00-2-2H2z"/><path d="M22 5h-7a3 3 0 00-3 3v12a2 2 0 012-2h8z"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
+ send:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>',
+ bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 21h4"/>',
+ watch:'<rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 6V3h6v3M9 18v3h6v-3"/>',
+ check:'<path d="M5 12l5 5 9-10"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+ shieldx:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16v.5"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ chev:'<path d="M9 6l6 6-6 6"/>',
+ down:'<path d="M6 9l6 6 6-6"/>',
+ up:'<path d="M18 15l-6-6-6 6"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+ phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/>',
+ alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/>',
+ speaker:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/>',
+ heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>',
+ cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+ finger:'<path d="M12 11v4M8 11a4 4 0 018 0v3a8 8 0 01-1 4M6 9a6 6 0 0112 0v5M4 13V9a8 8 0 0116 0"/>',
+ img:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/>',
+ del:'<path d="M9 6h11v12H9l-6-6z"/><path d="M12 10l4 4M16 10l-4 4"/>'
+};
+const ic=(n,s=24)=>`<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+const logo=(s=30)=>`<svg width="${s}" height="${s}" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="14" fill="#1D5C57"/><circle cx="15" cy="15" r="6" fill="none" stroke="#F2B544" stroke-width="2.4"/></svg>`;
+
+/* ---------- content ---------- */
+const DUR={q:'How long has this been happening?',o:['A few weeks','A few months','A year or more']};
+const lc=s=>s?s.charAt(0).toLowerCase()+s.slice(1):'';
+const TOPICS={
+ aches:{chip:'Body aches and joint pain',hint:'Knees, back, shoulders',short:'your aches',
+  qs:[{q:'Where do you feel it most?',o:['Knees','Back','Shoulders or neck','All over']},{q:'Is it worse in the morning?',o:['Yes','No','Not sure']},DUR],
+  explain:'Aches and stiff joints are among the most common changes women in India notice in midlife. Changing hormones can play a part, along with changes in muscle and bone.',
+  tips:['Stretch gently for 5 minutes after you wake up.','Walk for 20 minutes on most days, at an easy pace.','Note which days are worse, so we can look for a pattern.'],
+  next:{t:'Easy stretches for stiff mornings',m:'3-minute read',d:'Easy morning stretches'},
+  check:{q:'How are your knees and back today?',o:['No pain','A little','A lot'],d:'How do you feel today?'},
+  sum:a=>`Aches${a[0]?' in '+lc(a[0]):''}${a[2]?', for '+lc(a[2]):''}`},
+ tired:{chip:'Tired, low energy, "weakness"',hint:'Hard to get through the day',short:'your energy',
+  qs:[{q:'How often do you feel this way?',o:['Most days','Some days','Rarely']},{q:'Is your sleep broken too?',o:['Yes','Sometimes','No']},DUR],
+  explain:'Feeling weak or tired is very common at this stage. Broken sleep, heavy periods and everyday stress can all add to it.',
+  tips:['Eat regular meals with dal, eggs or greens for protein and iron.','Get outside in daylight for a short walk each morning.','If you feel tired most days, ask a doctor about a simple blood test for low iron.'],
+  next:{t:'Why you might feel tired, and what helps',m:'3-minute read',d:'More energy through the day'},
+  check:{q:"How's your energy today?",o:['Good','Okay','Low','Very low']},
+  sum:a=>`Low energy${a[0]?', '+lc(a[0]):''}${a[2]?', for '+lc(a[2]):''}`},
+ sleep:{chip:'Sleep problems',hint:"Waking up, can't drop off",short:'your sleep',sleep:true,
+  qs:[{q:'How often do you wake up at night?',o:['Most nights','A few nights a week','Rarely']},{q:'When you wake up, do you feel hot or sweaty?',o:['Yes, often','Sometimes','No']},DUR],
+  explain:'Waking at night is very common when periods start to change. Shifting hormones can affect how your body handles heat, and that breaks sleep.',
+  tips:['Keep the room cool: a fan, light cotton sheets and nightwear.','Keep cool water by the bed for when you wake.','Get up at the same time each day, even after a bad night.'],
+  next:{t:'3 things that help with waking up at night',m:'2-minute read',d:'3 tips for better nights'},
+  check:{q:'How did you sleep last night?',o:['Slept well','Woke once or twice','Woke a lot','Hardly slept'],d:'How was your night?'},
+  sum:a=>`Waking at night${a[1]&&a[1]!=='No'?' with sweating':''}${a[2]?', for '+lc(a[2]):''}`},
+ periods:{chip:'Periods changing or bleeding',hint:'Earlier, later, heavier',short:'your periods',
+  qs:[{q:"What's changed most?",o:['Coming earlier','Coming later','Heavier','Spotting in between']},{q:'On heavy days, do you change a pad every 1–2 hours?',o:['Yes','Sometimes','No']},DUR],
+  explain:'Periods often change in the years before they stop. They can come earlier or later, or be heavier for a while.',
+  tips:['Note the first day of each period here, so you can see the gaps.','Note very heavy days. Your doctor will want to know.','Keep iron-rich foods in your meals, like greens, dal and jaggery.'],
+  next:{t:'Understand why your cycle is changing',m:'3-minute read',d:'Understanding your cycle'},
+  check:{q:'Did your period start today?',o:['Yes','No','Not sure'],d:'Anything to note today?'},
+  sum:a=>`Periods: ${a[0]?lc(a[0]):'changing'}${a[2]?', for '+lc(a[2]):''}`},
+ mood:{chip:'Mood, "tension", anger or worry',hint:'Not feeling like yourself',short:'how you feel',
+  qs:[{q:'Which feels closest?',o:['Tension or worry','Anger, short temper','Low or sad','A mix']},{q:'Does it get in the way of your day?',o:['A lot','A little','Not really']},DUR],
+  explain:'Many women feel more tense, angry or low in midlife. Changing hormones, poor sleep and a lot of responsibility can all play a part. It is not your fault.',
+  tips:['When tension rises, breathe out slowly, five times.','Tell one person you trust how you have been feeling.','Notice whether your mood dips after a bad night. We can track this together.'],
+  next:{t:'Mood changes in midlife: what helps',m:'3-minute read',d:'Feeling more like yourself'},
+  check:{q:'How are you feeling today?',o:['Good','Okay','Low','Not good']},
+  sum:a=>`Mood: ${a[0]?lc(a[0]):'changes'}${a[2]?', for '+lc(a[2]):''}`},
+ hot:{chip:'Hot flushes and sweating',hint:'Sudden heat, night sweats',short:'hot flushes',
+  qs:[{q:'About how many hot flushes in a day?',o:['1–2','3–5','More than 5']},{q:'Do they wake you at night?',o:['Yes, often','Sometimes','No']},DUR],
+  explain:'Hot flushes happen when changing hormones affect how the body controls heat. They are common and usually ease with time.',
+  tips:['Wear light cotton layers you can take off quickly.','Keep a fan or cool water nearby.','At the start of a flush, breathe slowly and deeply.'],
+  next:{t:'3 things that help with night sweats',m:'2-minute read',d:'3 tips for cooler nights'},
+  check:{q:'Any hot flushes yesterday?',o:['None','A few','Many'],d:'Any warm spells yesterday?'},
+  sum:a=>`Hot flushes${a[0]?', '+a[0]+' a day':''}${a[2]?', for '+lc(a[2]):''}`},
+ whats:{chip:"What's happening to me?",hint:'Help me understand',short:'what you have noticed',
+  qs:[{q:'Which have you noticed most?',o:['Sleep changes','Aches or tiredness','Mood changes','Periods changing']},{q:'How much does it bother you?',o:['A lot','A little','Not much']},DUR],
+  explain:'Many women notice several small changes in their 40s and 50s. They often link to the years around the last period, called the menopause transition.',
+  tips:['Keep a short note of what changes and when.','Bring your notes to a doctor. It makes the visit easier.','You are not alone. Most women go through this.'],
+  next:{t:'What changes in your 40s and 50s: a simple guide',m:'3-minute read',d:'A simple guide to midlife'},
+  check:{q:'How are you feeling today?',o:['Good','Okay','Low','Not good']},
+  sum:a=>`Noticed: ${a[0]?lc(a[0]):'some changes'}${a[2]?', for '+lc(a[2]):''}`}
+};
+const MORE=[['intimate','Intimate health'],['contra','Contraception'],['treat','Treatment options'],['bones','Bones and heart']];
+MORE.forEach(([k,l])=>{TOPICS[k]={chip:l,hint:'',short:lc(l),
+ qs:[{q:'What would help most?',o:['Understand it','Know my options','Questions for my doctor']},{q:'Have you talked to a doctor about this?',o:['Yes','No','Not yet']},{q:'How much does it bother you?',o:['A lot','A little','Not much']}],
+ explain:`Thanks for telling me. I'll keep this private and share a short, simple guide on ${lc(l)}.`,
+ tips:['Read the 3-minute guide in Learn.','Write down questions as they come up.','Bring them to your next doctor visit.'],
+ next:{t:`A short guide: ${lc(l)}`,m:'3-minute read',d:'A short guide for you'},
+ check:{q:'How are you feeling today?',o:['Good','Okay','Low','Not good']},
+ sum:a=>`${l}: ${a[0]?lc(a[0]):'interested'}`};});
+
+const GROUPS={
+ pre:{stage:{t:'Before the changes start',because:'Because you told us your periods are still regular.',d:'Chapter 1',tl:0},learn:['contra'],
+  later:{notice:'You logged better sleep on days you walked.'}},
+ A:{learn:['contra','treat','bones'],
+  later:{check:{q:"How's your energy today?",o:['Good','Okay','Low','Very low']}}},
+ B:{stage:{t:'Periods changing',sub:'(early perimenopause)',because:'Because you told us your periods now come earlier or later.',d:'Chapter 2',tl:1},cycle:'last 3: 24, 41, 35 days',learn:['contra'],
+  later:{next:{t:'Understand why your cycle is changing',m:'3-minute read',d:'Understanding your cycle'},check:{q:'Did your period start today?',o:['Yes','No','Not sure'],d:'Anything to note today?'},notice:'You logged poorer sleep in the week before your period.'}},
+ C:{stage:{t:'Later in the transition',sub:'(late perimenopause)',because:'Because you told us your periods now have gaps of 2 months or more.',d:'Chapter 3',tl:2},cycle:'74 days since last period',learn:['contra','treat','bones'],
+  later:{next:{t:'3 things that help with night sweats',m:'2-minute read',d:'3 tips for cooler nights'},check:{q:'Any hot flushes yesterday?',o:['None','A few','Many'],d:'Any warm spells yesterday?'},notice:'On nights with sweats, you woke 2–3 times.'}},
+ D:{stage:{t:'Close to your last period',d:'Chapter 4',tl:3},learn:['contra','treat','bones'],
+  later:{next:{t:'Learn your treatment options, and questions to ask your doctor',m:'4-minute read',d:'Questions for your next appointment'},check:{q:'How are you feeling today?',o:['Good','Okay','Low','Not good']},notice:'On poor-sleep days, you logged lower mood.'}},
+ E:{stage:{t:'After your last period',sub:'(postmenopause)',d:'Chapter 5',small:true,tl:4},bleedLog:true,learn:['treat','bones','prev','intimate'],
+  later:{next:{t:'This month, try 2 strength exercises for strong bones.',btns:['Start','Not now'],d:'This month, try 2 strength exercises.'},check:{q:'How are your knees and back today?',o:['No pain','A little','A lot'],d:'How do you feel today?'},notice:'On days you walked, you logged less stiffness.'}},
+ F:{stage:{t:'After your last period',d:'Chapter 6',small:true,tl:4},bleedLog:true,big:true,learn:['prev','bones','treat','intimate'],
+  later:{next:{t:'Book a free blood pressure and sugar check this month.',btn:'Find a check near me',strong:true,d:'Book a free check-up this month.'},check:{q:"How's your energy today?",o:['Good','Okay','Low']},notice:'You stayed active 4 of 7 days this week.'}}
+};
+const SPECIAL={
+ hormones:{stage:{t:"We'll go by how you feel",because:"Your treatment can hide period changes, so we won't guess a stage from your periods.",d:'Your chapter'},
+  next:{t:'Questions to ask your doctor about your treatment',m:'2-minute read',d:'Questions for your next appointment'},check:{q:'How are you feeling today?',o:['Good','Okay','Low','Not good']},bleedNote:true,learn:['treat']},
+ womb:{stage:{t:"We'll go by your symptoms",because:"Your womb was removed, so periods can't tell us your stage. We'll go by how you feel and your age.",d:'Your chapter'},learn:['treat','bones']},
+ surgery:{stage:{t:'Menopause after surgery',because:'Because you told us your ovaries were removed.',d:'Your chapter'},
+  next:{t:'Talk to a gynaecologist about what this means for you',btn:'Book a teleconsult',strong:true,d:'Book a chat with a doctor'},
+  check:{q:'Any hot flushes yesterday?',o:['None','A few','Many'],d:'Any warm spells yesterday?'},extra:{t:'Looking after your bones early',m:'3-minute read',d:'Staying strong'},learn:['bones','treat']},
+ notsure:{stage:{t:"Let's understand this together",because:"Not sure where you are? That's okay. I'll ask one gentle question a day this week.",d:'Getting to know you',days:true},
+  check:{q:'Have your periods felt different in the last year?',o:['Yes','No','Not sure'],d:'Has anything felt different this year?',label:"Today's question"},learn:['contra']}
+};
+const ARTS={
+ contra:{t:'Do I still need contraception?',m:'Pregnancy is still possible until periods have stopped for 1–2 years.',d:'Planning ahead'},
+ treat:{t:'Treatment options: HRT and non-hormone choices',m:'Benefits and risks shown as “out of 1,000 women”.',d:'Your options'},
+ bones:{t:'Strong bones after 40',m:'Simple strength and balance moves.',d:'Staying strong'},
+ prev:{t:'Free BP and sugar checks near you',m:'Offered under the government NCD programme.',d:'Free check-ups'},
+ intimate:{t:'Vaginal and bladder health',m:'Common after menopause, and treatable.',d:'Private topics'}
+};
+const MEANS={
+ pre:'Your periods are still regular. Some women notice small changes, like poorer sleep or aches, before their periods change.',
+ B:'Periods that come a week or more earlier or later are often the first sign of the transition. This stage can last a few years.',
+ C:'Gaps of 2 months or more usually mean the last period is getting closer. Hot flushes and night sweats are most common now.',
+ D:'When a whole year passes without a period, that point is called menopause. I will ask you before changing anything.',
+ E:'These are the years after your last period. Bones and heart need more care now, and any bleeding needs a doctor’s check.',
+ F:'These are the later years after your last period. Regular check-ups, and strength and balance, matter most now.',
+ A:'Period changes before 40 can have several causes. A doctor and a simple blood test can explain them. I won’t guess a stage.',
+ hormones:'Pills, a coil or hormone treatment can change or stop bleeding. So I will go by how you feel, not by your periods.',
+ womb:'Without a womb there are no periods, but your ovaries still go through the change. I will go by how you feel and your age.',
+ surgery:'Removing both ovaries brings on menopause straight away. A doctor can talk you through support, including for your bones.',
+ notsure:'That’s okay. Over the next week I’ll ask a few gentle questions, one a day, and we’ll work it out together.'
+};
+const KNOWL={peri:"I'm in perimenopause",meno:"I've reached menopause",post:"I'm postmenopausal",unsure:"I'm not sure – help me understand"};
+const STAGEL={peri:'Perimenopause',meno:'Menopause',post:'Postmenopause'};
+const GL={pre:'Before the changes',A:'A · Under 40 with changes',B:'B · Early perimenopause',C:'C · Late perimenopause',D:'D · Around menopause',E:'E · Early postmenopause',F:'F · Later postmenopause'};
+const SPL={hormones:'Special · on pills, coil or HRT',womb:'Special · womb removed',surgery:'Special · ovaries removed',notsure:'Special · not sure'};
+const YL={'1-2':'1–2 years','3-5':'3–5 years','5+':'more than 5 years','2+':'more than 2 years'};
+
+/* ---------- state ---------- */
+function fresh(){return {screen:'welcome',name:'',year:null,phone:'',otp:'',autoFilled:false,resendIn:0,
+ consentA:null,consentB:null,pin:false,bio:false,pinSkip:false,pinBuf:'',notifHidden:true,notifAsked:false,discreet:false,discAsked:false,
+ device:{src:null,sleep:false,steps:false,hr:false,connected:false},
+ topic:null,moreOpen:false,own:'',reflect:null,knows:undefined,chat:[],q:null,typing:false,ans:{},tans:[],tq:0,
+ items:[],saved:[],group:null,special:null,told:false,diag:false,corrected:false,redFlag:false,bleedLogged:null,because12:null,months:null,
+ later:false,checkins:1,checkDone:null,log:[],altNext:0,tab:'home',sheet:null,article:null,locked:false,lockBuf:'',bleed:{when:null,amt:null},hosp:false,preset:null};}
+let S=fresh();
+const age=()=>S.year?NOW-S.year:null;
+const cfg=()=>S.special?SPECIAL[S.special]:(GROUPS[S.group]||GROUPS.pre);
+let tT;
+function toast(t){toastEl.textContent=t;toastEl.hidden=false;clearTimeout(tT);tT=setTimeout(()=>{toastEl.hidden=true;},2800);}
+
+/* ---------- first chat engine ---------- */
+const bot=t=>S.chat.push({who:'bot',t});
+const me=t=>S.chat.push({who:'me',t});
+function ask(id){const Q=QS[id];if(Q.t)bot(Q.t);S.q={id,o:Q.o};}
+const QS={
+ period:{t:'To give you the right information: <b>how are your periods these days?</b>',
+  o:[['Still regular','regular'],['Changing: earlier, later or heavier','changing'],['Gaps of 2 months or more','gaps'],['Stopped for a year or more','stopped'],['Stopped after an operation','surgery'],["On pills, a coil or hormone treatment, so I can't tell",'hormones'],["Not sure / I'd rather not say",'unsure',1]],
+  on(v,l){S.ans.period=v;S.ans.said=l;
+   if(v==='stopped')return ask('howLong');
+   if(v==='surgery')return ask('operation');
+   if(v==='hormones')bot("Your treatment can hide period changes, so we'll go by how you're feeling.");
+   if(v==='unsure')bot("That's okay, we'll work it out together.");
+   afterPeriod();}},
+ howLong:{t:'About how long ago?',o:[['1–2 years','1-2'],['3–5 years','3-5'],['More than 5','5+']],on(v){S.ans.years=v;afterPeriod();}},
+ operation:{t:'Which operation?',o:[['Womb removed, ovaries kept','womb'],['Ovaries removed','ovaries'],['Not sure','unsure',1]],
+  on(v,l){S.ans.op=v;S.ans.saidOp=l;
+   if(v==='womb')bot("Thanks. Without a womb, periods can't tell us much, so we'll go by how you feel.");
+   if(v==='ovaries')bot('Thank you. Removing the ovaries brings on menopause straight away. A doctor can help with what comes next.');
+   if(S.knows&&S.knows!=='unsure')ask('doctor');else afterPeriod();}},
+ bPeri:{t:'Are you on any pills, a coil or hormone treatment right now?',o:[['No','no'],['Yes','yes'],['Not sure','unsure',1]],
+  on(v){S.ans.hormones=v;if(v==='yes')bot("Thanks. Your treatment can hide period changes, so we'll go by how you're feeling.");ask('doctor');}},
+ bMeno:{t:'About how long ago was your last period?',o:[['Less than a year','lt1'],['1–2 years','1-2'],['More than 2 years','2+'],['After an operation','op'],['Not sure','unsure',1]],
+  on(v){S.ans.years=v;if(v==='op')ask('operation');else ask('doctor');}},
+ bPost:{t:'About how long ago was your last period?',o:[['1–2 years','1-2'],['3–5 years','3-5'],['More than 5 years','5+'],['After an operation','op'],['Not sure','unsure',1]],
+  on(v){S.ans.years=v;if(v==='op')ask('operation');else ask('doctor');}},
+ doctor:{t:'Has a doctor talked to you about this?',o:[['Yes','yes'],['No','no'],["Not yet, but I'd like to",'later']],
+  on(v){S.ans.doctor=v;if(v==='later')bot("Good idea. I'll help you get ready for that visit.");afterPeriod();}},
+ bleed:{t:'Any bleeding or spotting since then?',o:[['Yes','yes'],['No','no'],['Not sure','unsure',1]],
+  on(v){S.ans.bleed=v;
+   if(v==='yes'){S.redFlag=true;S.chat.push({k:'red'});bot(`When you're ready, I can keep going with your questions about ${TOPICS[S.topic].short}.`);return ask('cont');}
+   afterSafety();}},
+ cont:{t:null,o:[['Keep going','go']],on(){afterSafety();}},
+ under40:{t:"Changes like these before 40 are worth a doctor's check. Has a doctor looked into this?",o:[['Yes','yes'],['No','no'],['Not yet','later']],
+  on(v){S.ans.u40=v;if(v!=='yes')bot("I'll keep this at the top of your Home, so it's easy to book.");startTopic();}},
+ save:{t:null,o:[['Review what to save','save']],on(){S.items=buildItems();S.screen='save';}},
+ card:{t:null,o:[['See where you might be','card']],on(){computeGroup();S.screen='stagecard';}}
+};
+function afterPeriod(){const a=S.ans,y=a.years;
+ const stopped=a.period==='stopped'||(S.knows==='meno'&&(y==='1-2'||y==='2+'))||(S.knows==='post'&&['1-2','3-5','5+'].includes(y));
+ if(stopped&&!a.bleed)return ask('bleed');
+ afterSafety();}
+function afterSafety(){const a=S.ans,ag=age();
+ const changes=(a.period&&!['regular','unsure','hormones'].includes(a.period))||(S.knows&&S.knows!=='unsure');
+ if(ag!==null&&ag<40&&changes&&!a.u40&&a.doctor!=='yes')return ask('under40');
+ startTopic();}
+function startTopic(){const T=TOPICS[S.topic];bot(`Thanks, that helps. Now 3 quick questions about ${T.short}, then I'll share what may help.`);S.tq=0;askTopic();}
+function askTopic(){const T=TOPICS[S.topic];if(S.tq>=3)return giveTips();
+ const q=T.qs[S.tq];S.chat.push({k:'prog',n:S.tq+1});bot(q.q);S.q={id:'topic',o:[...q.o.map(x=>[x,x]),['Skip','__skip',1]]};}
+function topicAns(v,l){S.tans[S.tq]=v==='__skip'?null:l;
+ if(S.topic==='mood'&&S.tq===0&&v==='Low or sad')bot('Thank you for telling me. If it ever feels like too much, Tele-MANAS is free on 14416, any time. You can also tap <b>Need help now?</b> at the top.');
+ if(S.topic==='periods'&&S.tq===1&&v==='Yes')bot("Bleeding that heavy is worth a doctor's check, as it can lead to low iron.");
+ S.tq++;askTopic();}
+function giveTips(){const T=TOPICS[S.topic];
+ bot(`Thank you, ${esc(S.name)}. ${T.explain}`);S.chat.push({k:'tips'});
+ if(S.consentB==='yes'){bot('Want me to remember what you told me, so I can spot patterns?');ask('save');}
+ else{bot("Your health notes are off, so I won't save any of this. You can turn them on in Settings → Privacy.");ask('card');}}
+function startChat(){S.chat=[];S.ans={};S.tans=[];S.tq=0;S.q=null;S.redFlag=false;S.typing=false;
+ if(S.knows===null){bot("Let's work it out together.");ask('period');}
+ else if(S.knows==='unsure'){me(KNOWL.unsure);bot("That's okay, we'll work it out together.");ask('period');}
+ else{me(KNOWL[S.knows]);bot('Thanks for telling me. One quick check so I get this right.');ask({peri:'bPeri',meno:'bMeno',post:'bPost'}[S.knows]);}
+ S.screen='chat';}
+function answer(i,sync){const q=S.q;if(!q)return;const o=q.o[i];if(!o)return;me(esc(o[0]));S.q=null;
+ const run=()=>{if(q.id==='topic')topicAns(o[1],o[0]);else QS[q.id].on(o[1],o[0]);};
+ if(sync){run();return;}
+ S.typing=true;render();setTimeout(()=>{S.typing=false;run();render();},520);}
+function autoRun(vals){for(const v of vals){if(!S.q)break;let i=S.q.o.findIndex(o=>o[1]===v);if(i<0)i=0;answer(i,true);}}
+
+function buildItems(){const a=S.ans,items=[];
+ const pl={regular:'Periods: still regular',changing:'Periods: changing (earlier or later)',gaps:'Periods: gaps of 2 months or more',stopped:`Periods: stopped ${YL[a.years]||'a year or more'} ago`,hormones:'On pills, a coil or hormone treatment'};
+ if(S.knows&&S.knows!=='unsure')items.push({t:`${STAGEL[S.knows]} (you told us)${a.years&&YL[a.years]?`, last period ${YL[a.years]} ago`:''}`,said:KNOWL[S.knows]});
+ else if(pl[a.period])items.push({t:pl[a.period],said:a.said});
+ if(a.op==='ovaries'||a.op==='womb')items.push({t:a.op==='ovaries'?'Operation: ovaries removed':'Operation: womb removed, ovaries kept',said:a.saidOp});
+ if(a.bleed==='yes')items.push({t:'Bleeding or spotting after periods stopped',said:'Yes'});
+ const T=TOPICS[S.topic];items.push({t:T.sum(S.tans),said:S.own||S.tans.filter(Boolean).join(' · ')});
+ return items.slice(0,3).map(x=>({...x,state:null,editing:false,draft:x.t}));}
+
+function computeGroup(){const a=S.ans,ag=age();let g=null,sp=null;S.told=false;S.diag=false;S.corrected=false;S.altNext=0;
+ if(a.op==='ovaries')sp='surgery';
+ else if(a.op==='womb')sp='womb';
+ else if(a.period==='hormones'||a.hormones==='yes')sp='hormones';
+ else if(S.knows==='peri'){g='B';S.told=true;}
+ else if(S.knows==='meno'){g=['lt1','unsure','op'].includes(a.years)?'D':(a.years==='5+'?'F':'E');S.told=true;}
+ else if(S.knows==='post'){g=a.years==='5+'?'F':'E';S.told=true;}
+ else if(a.period==='regular')g='pre';
+ else if(a.period==='changing')g='B';
+ else if(a.period==='gaps')g='C';
+ else if(a.period==='stopped')g=a.years==='5+'?'F':'E';
+ else sp='notsure';
+ if(ag!==null&&ag<40&&g&&g!=='pre'){if(S.told&&a.doctor==='yes')S.diag=true;g='A';}
+ S.group=g;S.special=sp;}
+
+function stageInfo(){
+ if(S.special)return SPECIAL[S.special].stage;
+ const g=S.group;
+ if(g==='A')return S.diag?{t:'Early menopause',sub:'(diagnosed by your doctor)',because:'Because you told us a doctor has confirmed this.',d:'Your chapter'}:null;
+ const st={...GROUPS[g].stage};
+ if(S.told){st.t=STAGEL[S.knows];st.sub='(you told us)';if(g==='B')st.because='You can change this anytime.';}
+ if(g==='D')st.because=`It's been ${S.months?'about '+S.months+' months':'less than a year'}. At 12 months, this is called menopause.`;
+ if(g==='E'||g==='F')st.because=S.because12||(g==='F'?"It's been more than 5 years since your last period.":S.ans.years==='3-5'?"It's been about 3–5 years since your last period.":"It's been about 1–2 years since your last period.");
+ if(S.corrected)st.because='You changed this, so Home has updated to match.';
+ return st;}
+const isDoctorCard=()=>S.group==='A'&&!S.special&&!S.diag;
+const learnList=()=>cfg().learn||[];
+
+/* ---------- shared bits ---------- */
+const helpBtn=()=>`<button class="help" data-a="help">${ic('help',20)}Need help now?</button>`;
+const backBtn=to=>`<button class="ib0" aria-label="Back" data-a="go" data-v="${to}">${ic('back')}</button>`;
+const obHdr=(to,n)=>`<header class="hdr">${backBtn(to)}<div class="prog" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="${n}">${[1,2,3,4].map(i=>`<i class="seg${i<=n?' on':''}"></i>`).join('')}</div><span style="width:44px"></span></header>`;
+const hdrHelp=to=>`<header class="hdr">${backBtn(to)}${helpBtn()}</header>`;
+const closeBtn=()=>`<button class="ib1" aria-label="Close" data-a="closeSheet">${ic('x')}</button>`;
+const dots=n=>[0,1,2,3].map(i=>`<i class="${i<n?'on':''}"></i>`).join('');
+const keypad=a=>`<div class="keypad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button class="key" data-a="${a}" data-v="${d}">${d}</button>`).join('')}<span class="key blank"></span><button class="key" data-a="${a}" data-v="0">0</button><button class="key" aria-label="Delete" data-a="${a}" data-v="del">${ic('del')}</button></div>`;
+const greet=()=>{const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening';};
+const YEARS=[];for(let y=2012;y>=1940;y--)YEARS.push(y);
+const fmtPhone=p=>{const d=digits(p);return d.length===10?d.slice(0,5)+' '+d.slice(5):d;};
+
+/* ---------- screens ---------- */
+const SCR={};
+SCR.welcome=()=>`<div class="scr"><div class="body pad" style="padding-top:28px;gap:18px">
+ <div class="row" style="gap:10px">${logo()}<span class="brand">NAARIZE</span></div>
+ <div class="photo" role="img" aria-label="Photo placeholder: Indian women in their 40s and 50s">${ic('img',34)}<b>Photo: Indian women in their 40s and 50s</b><span>Calm, warm, natural light</span></div>
+ <h1 class="h1" style="font-size:22px;line-height:1.35">I'm here to help you understand what's happening in your body, keep track of changes, and get ready for your doctor.</h1>
+ <p class="p">I'm an AI guide, not a doctor. I can't diagnose or prescribe. When something needs a doctor, I'll tell you clearly.</p>
+ <div class="card doc"><span class="avatar" role="img" aria-label="Doctor photo placeholder">${ic('user')}</span><div class="stack" style="gap:2px"><span class="lbl">Health content reviewed by</span><b style="font-size:16px">Dr. [Name], MD</b><span class="why" style="font-size:14px">Obstetrics &amp; Gynaecology</span></div></div>
+</div><div class="foot"><button class="btn btn-p" data-a="go" data-v="phone">Get started</button></div></div>`;
+
+SCR.phone=()=>`<div class="scr">${obHdr('welcome',1)}<div class="body pad">
+ <div class="stack" style="gap:8px;margin-top:8px"><h1 class="h1">What's your mobile number?</h1><p class="why">We'll text you a 6-digit code to sign in. The message won't name the app.</p></div>
+ <div class="stack" style="gap:8px"><label for="mob" class="fl">Mobile number</label>
+  <div class="row" style="gap:10px"><span class="cc">+91</span><input id="mob" class="inp" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" value="${esc(S.phone)}" data-i="phone" data-enter="sendCode"></div>
+  <button class="tlink" style="align-self:flex-start" data-a="samplePhone">Use a sample number</button></div>
+ <div class="row why" style="gap:10px;align-items:flex-start">${ic('shield',20)}<span>No email or password. We only use your number to keep your account safe.</span></div>
+</div><div class="foot"><button class="btn btn-p" id="sendBtn" data-a="sendCode" ${digits(S.phone).length===10?'':'disabled'}>Send code</button></div></div>`;
+
+SCR.code=()=>{const c=S.otp;return `<div class="scr">${obHdr('phone',1)}<div class="body pad">
+ <div class="stack" style="gap:8px;margin-top:8px"><h1 class="h1">Enter the 6-digit code we sent you.</h1><p class="why">Sent to +91 ${esc(fmtPhone(S.phone))}</p></div>
+ <div class="stack" style="gap:10px"><div class="otp"><label for="otp" class="sr">6-digit code</label><input id="otp" class="otp-in" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value="${c}" data-i="otp" data-enter="codeNext"><div class="otp-boxes" aria-hidden="true">${[0,1,2,3,4,5].map(i=>`<span class="ob${i===c.length?' cur':''}">${c[i]||''}</span>`).join('')}</div></div>
+ <div class="ok-note" id="autoNote" ${S.autoFilled?'':'hidden'}>${ic('check',18)} Filled in automatically</div></div>
+ <div class="warn">${ic('shieldx')}<b style="font-style:italic">Never share this code with anyone.</b></div>
+ <div class="row sb"><button class="tlink" id="resend" data-a="resend" ${S.resendIn>0?'disabled':''}>${S.resendIn>0?`Resend code in 0:${String(S.resendIn).padStart(2,'0')}`:'Resend code'}</button><button class="tlink" data-a="go" data-v="phone">Change number</button></div>
+</div><div class="foot"><button class="btn btn-p" id="codeBtn" data-a="codeNext" ${c.length===6?'':'disabled'}>Continue</button></div></div>`;};
+
+SCR.about=()=>`<div class="scr">${obHdr('code',2)}<div class="body pad">
+ <div class="stack" style="gap:8px;margin-top:4px"><label for="nm" class="h2">What should I call you?</label><input id="nm" class="inp" value="${esc(S.name)}" placeholder="Name or nickname" autocomplete="nickname" data-i="name"><p class="why">Any name or nickname. Only shown inside the app.</p></div>
+ <div class="hr"></div>
+ <div class="stack" style="gap:8px"><span class="h2" id="yl">What year were you born?</span>
+  <div class="years" id="years" role="listbox" aria-labelledby="yl">${YEARS.map(y=>`<button class="yr${S.year===y?' on':''}" role="option" aria-selected="${S.year===y}" data-a="year" data-v="${y}">${y}</button>`).join('')}</div>
+  <p class="why">Just the year. It checks you're 18 or over and tells me which guidance fits your age.</p></div>
+</div><div class="foot"><button class="btn btn-p" id="aboutBtn" data-a="aboutNext" ${S.name.trim()&&S.year?'':'disabled'}>Continue</button></div></div>`;
+
+SCR.under18=()=>`<div class="scr"><div class="body pad center" style="justify-content:center;align-items:center;gap:18px;padding:24px 28px">
+ <span class="oi" style="width:96px;height:96px;border-radius:48px">${ic('heart',44)}</span>
+ <h1 class="h1" style="font-size:26px">NAARIZE is for women 18 and over.</h1>
+ <p class="p" style="font-size:18px">A doctor or a trusted adult can help with your questions.</p>
+ <p class="why">Nothing you entered has been saved.</p>
+</div><div class="foot"><button class="btn btn-p" data-a="restart">Close</button><button class="btn btn-s" data-a="go" data-v="about">I entered the wrong year</button></div></div>`;
+
+function cCard(k,title,rows){const v=S['consent'+k];
+ return `<section class="card" style="gap:12px" aria-labelledby="c${k}"><h2 class="h3" id="c${k}">${title}</h2><dl class="dl">${rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>
+ <div class="g2"><button class="btn sm ${v==='yes'?'btn-p':'btn-s'}" aria-pressed="${v==='yes'}" data-a="consent" data-v="${k}:yes">${v==='yes'?ic('check',20):''}Yes</button><button class="btn sm ${v==='no'?'btn-p':'btn-s'}" aria-pressed="${v==='no'}" data-a="consent" data-v="${k}:no">${v==='no'?ic('check',20):''}Not now</button></div></section>`;}
+SCR.consent=()=>`<div class="scr">${obHdr('about',3)}<div class="body pad" style="gap:14px">
+ <div class="stack" style="gap:4px"><h1 class="h1" style="font-size:24px">Two things to agree to</h1><p class="why">Anything else, we'll ask when it matters.</p></div>
+ ${cCard('A','A. Your account',[['What we keep','Phone number, name, year of birth'],['Why','To run the app for you']])}
+ ${S.consentA==='no'?`<p class="note">Without this, NAARIZE can't keep an account for you. You can still read and learn as a guest.</p>`:''}
+ ${cCard('B','B. Your health notes',[['What we keep','Symptoms, periods, mood and sleep you choose to log'],['Why','To show your patterns and help answer your questions'],['Who can see it','Only you, unless you share it with a doctor'],['How long','Until you delete it'],['Change your mind','Settings → Privacy']])}
+ ${S.consentB==='no'?`<p class="note">That's fine. You can still read and learn, but nothing you tell me will be saved.</p>`:''}
+ <div class="row" style="justify-content:center;gap:24px"><button class="tlink" data-a="sheet" data-v="notice">${ic('doc',20)}Read full notice</button><button class="tlink" data-a="listen">${ic('speaker',20)}Listen</button></div>
+</div><div class="foot"><button class="btn btn-p" data-a="go" data-v="private" ${S.consentA&&S.consentB?'':'disabled'}>Continue</button></div></div>`;
+
+const pick=(on,label,a,v)=>`<button class="btn sm ${on?'btn-p':'btn-s'}" aria-pressed="${!!on}" data-a="${a}" data-v="${v}">${on?ic('check',18):''}${label}</button>`;
+SCR.private=()=>{const pinTag=S.pin?'<span class="tag">PIN on</span>':S.bio?'<span class="tag">Fingerprint</span>':S.pinSkip?'<span class="tag grey">Skipped</span>':'';
+ return `<div class="scr">${obHdr('consent',4)}<div class="body pad" style="gap:14px">
+ <div class="stack" style="gap:4px"><h1 class="h1" style="font-size:24px">Keep NAARIZE private</h1><p class="p">If others use your phone, these help keep NAARIZE private. Each is optional.</p></div>
+ <section class="card" style="gap:12px"><div class="row" style="gap:12px;align-items:flex-start"><span class="oi">${ic('lock')}</span><div style="flex:1"><h2 class="ot">Set a PIN for NAARIZE</h2><p class="od">Others may have a fingerprint saved on this phone. A PIN just for NAARIZE is safest.</p></div>${pinTag}</div>
+  <div class="g3">${pick(S.pin,S.pin?'Change PIN':'Set PIN','sheet','pin')}${pick(S.bio,'Fingerprint','bio','')}${pick(S.pinSkip&&!S.pin&&!S.bio,'Skip','pinSkip','')}</div></section>
+ <section class="card" style="gap:12px"><div class="row" style="gap:12px;align-items:flex-start"><span class="oi">${ic('bell')}</span><div style="flex:1"><h2 class="ot">Hide details in notifications</h2><p class="od">Notifications only say “You have a new message.”</p></div><span class="tag${S.notifHidden?'':' grey'}">${S.notifHidden?'On':'Off'}</span></div>
+  <div class="g2">${pick(S.notifAsked&&S.notifHidden,'Keep on','notif','on')}${pick(!S.notifHidden,'Turn off','notif','off')}</div></section>
+ <section class="card" style="gap:12px"><div class="row" style="gap:12px;align-items:flex-start"><span class="oi">${ic('eye')}</span><div style="flex:1"><h2 class="ot">Discreet mode</h2><p class="od">Hides health words on Home.</p></div>${S.discreet?'<span class="tag">On</span>':''}</div>
+  <div class="g2">${pick(S.discreet,'Turn on','disc','on')}${pick(S.discAsked&&!S.discreet,'Not now','disc','off')}</div></section>
+</div><div class="foot"><button class="btn btn-p" data-a="go" data-v="device">Continue</button></div></div>`;};
+
+SCR.device=()=>{const d=S.device,srcs=['Google Health Connect','Apple Health','[Watch brand, to be decided]'];const ok=d.src&&(d.sleep||d.steps||d.hr);
+ const sw=(k,l)=>`<div class="swrow"><span id="sw-${k}">${l}</span><button class="sw" role="switch" aria-checked="${d[k]}" aria-labelledby="sw-${k}" data-a="sw" data-v="${k}"></button></div>`;
+ return `<div class="scr"><header class="hdr">${backBtn('private')}<span class="tag grey">Optional</span></header><div class="body pad" style="gap:14px">
+ <div class="row" style="gap:14px;align-items:flex-start"><span class="oi" style="width:48px;height:48px">${ic('watch',28)}</span><div class="stack" style="gap:4px"><h1 class="h1" style="font-size:24px">Connect a device?</h1><p class="p" style="font-size:15px">Use a smartwatch or fitness app? NAARIZE can read your sleep and steps so you log less.</p></div></div>
+ <div class="stack" style="gap:8px">${srcs.map(s=>`<button class="src${d.src===s?' on':''}" aria-pressed="${d.src===s}" data-a="src" data-v="${esc(s)}"><span class="logo-ph"></span>${esc(s)}</button>`).join('')}</div>
+ <div class="card" style="gap:0;padding:4px 16px">${sw('sleep','Sleep')}${sw('steps','Steps')}${sw('hr','Heart rate <span class="mut">(if you choose)</span>')}</div>
+ <dl class="dl" style="padding:0 4px;grid-template-columns:120px minmax(0,1fr)"><dt>Why</dt><dd>To fill in your sleep and activity check-ins for you</dd><dt>What we won't do</dt><dd>Share it, or read anything else</dd></dl>
+</div><div class="foot"><div class="g2"><button class="btn btn-s" data-a="connect" ${ok?'':'disabled'}>Connect</button><button class="btn btn-s" data-a="go" data-v="brings">Skip for now</button></div><p class="why center" style="font-style:italic;font-size:14px">You can do this later in Settings → Connected devices.</p></div></div>`;};
+
+const chip=k=>{const T=TOPICS[k];return `<button class="chip${S.topic===k?' on':''}" data-a="topic" data-v="${k}"><b>${esc(T.chip)}</b>${T.hint?`<small>${esc(T.hint)}</small>`:''}</button>`;};
+SCR.brings=()=>`<div class="scr"><header class="hdr">${logo()}${helpBtn()}</header><div class="body pad" style="gap:16px">
+ <div class="stack" style="gap:4px"><p class="p" style="color:#56615F;font-weight:600;font-size:17px">Hi ${esc(S.name||'there')}.</p><h1 class="h1">What brings you here today?</h1></div>
+ <div class="g2">${['aches','tired','sleep','periods','mood','hot','whats'].map(chip).join('')}<button class="chip more" aria-expanded="${S.moreOpen}" data-a="more"><b>More topics ${ic(S.moreOpen?'up':'down',18)}</b><small>${S.moreOpen?'Hide these':'4 more, kept private'}</small></button>${S.moreOpen?MORE.map(([k])=>chip(k)).join(''):''}</div>
+ ${S.reflect?`<section class="card" style="border:2px solid #1D5C57"><p class="cp">You said: <i>“${esc(S.own)}”</i></p><h2 class="ct">It sounds like this is about ${esc(lc(TOPICS[S.reflect].chip))}. Is that right?</h2><div class="g2"><button class="btn btn-s sm" data-a="reflectYes">Yes, that's it</button><button class="btn btn-s sm" data-a="reflectNo">Pick a topic</button></div></section>`:''}
+</div><div class="foot" style="gap:8px"><label for="own" class="fl">Or tell me in your own words</label><div class="inbar"><input id="own" placeholder="Type or speak…" value="${esc(S.own)}" data-i="own" data-enter="own"><button class="ib" aria-label="Speak" data-a="mic">${ic('mic')}</button><button class="ib send" aria-label="Send" data-a="own">${ic('send')}</button></div></div></div>`;
+
+SCR.stagek=()=>`<div class="scr">${hdrHelp('brings')}<div class="body pad" style="gap:18px">
+ <div class="picked">${ic('check',18)}You picked: ${esc(TOPICS[S.topic]?.chip||'')}</div>
+ <div class="stack" style="gap:6px"><p class="p" style="color:#56615F;font-weight:600;font-size:17px">Thanks.</p><h1 class="h1" style="font-size:26px">Do you already know where you are in this stage of life?</h1></div>
+ <div class="stack" style="gap:12px">${['peri','meno','post','unsure'].map(k=>`<button class="st" data-a="knows" data-v="${k}">${KNOWL[k]}${ic('chev')}</button>`).join('')}</div>
+ <p class="why center" style="margin-top:auto">You can change this anytime.</p>
+</div></div>`;
+
+function redChat(){return `<section class="rf"><div class="rfh"><span class="rfi">${ic('user',20)}</span><h2>Please see a gynaecologist within 1–2 weeks</h2></div><div class="rfb"><p>Any bleeding after periods have stopped for a year needs a doctor's check. Often it's nothing serious, but it's important to find out.</p><button class="btn btn-r" data-a="tele">Find a gynaecologist</button></div></section>`;}
+function tipsCard(){const T=TOPICS[S.topic];return `<section class="card" style="gap:12px"><h2 class="ct">${T.tips.length} things that may help</h2>${T.tips.map((t,i)=>`<div class="tip"><span class="num">${i+1}</span><span>${t}</span></div>`).join('')}<div class="rev">${ic('shield',16)}Reviewed by Dr. [Name], MD</div></section>`;}
+const progRow=n=>`<div class="qn">${[1,2,3].map(i=>`<i class="dot${i<=n?' on':''}"></i>`).join('')}Question ${n} of 3</div>`;
+function msg(m){if(m.k==='red')return redChat();if(m.k==='tips')return tipsCard();if(m.k==='prog')return progRow(m.n);return `<p class="${m.who}">${m.t}</p>`;}
+SCR.chat=()=>`<div class="scr"><header class="hdr bb"><div class="row" style="gap:4px">${backBtn(S.knows===null?'brings':'stagek')}<div class="stack"><b style="font-size:17px">NAARIZE</b><span class="why" style="font-size:13px">AI guide · not a doctor</span></div></div>${helpBtn()}</header>
+ <div class="log" id="log" role="log" aria-live="polite">${S.chat.map(msg).join('')}${S.typing?'<div class="bot typing" aria-label="NAARIZE is typing"><span></span><span></span><span></span></div>':''}${S.q?`<div class="opts" role="group" aria-label="Answers">${S.q.o.map((o,i)=>`<button class="opt${o[2]?' q':''}" data-a="ans" data-v="${i}">${o[0]}</button>`).join('')}</div>`:''}</div>
+ <div class="inbar2"><label for="ci" class="sr">Message</label><input id="ci" placeholder="Or type your answer…" data-enter="chatSend"><button class="ib" aria-label="Send" data-a="chatSend">${ic('send')}</button></div></div>`;
+
+function itemCard(it,i){const st=it.state;
+ return `<section class="card item${st==='yes'?' on':''}${st==='no'?' off':''}" style="gap:10px"><div class="row sb" style="gap:10px;align-items:flex-start">${it.editing?`<label class="sr" for="ed${i}">Edit item</label><input id="ed${i}" class="inp" style="height:48px;font-size:16px" value="${esc(it.draft)}" data-i="edit" data-n="${i}">`:`<h2 class="ot">${esc(it.t)}</h2>`}${st==='yes'?`<span class="tag">${ic('check',14)} Saved</span>`:st==='no'?'<span class="tag grey">Not saved</span>':''}</div>
+ ${it.said?`<p class="said">You said: “${esc(it.said)}”</p>`:''}
+ ${it.editing?`<div class="g2"><button class="btn btn-p sm" data-a="itemEditOk" data-v="${i}">Save change</button><button class="btn btn-s sm" data-a="itemEditCancel" data-v="${i}">Cancel</button></div>`:
+ `<div class="g3"><button class="btn sm ${st==='yes'?'btn-p':'btn-s'}" aria-pressed="${st==='yes'}" data-a="item" data-v="${i}:yes">Yes</button><button class="btn sm btn-s" data-a="itemEdit" data-v="${i}">${ic('edit',18)}Edit</button><button class="btn sm ${st==='no'?'btn-p':'btn-s'}" aria-pressed="${st==='no'}" data-a="item" data-v="${i}:no">No</button></div>`}</section>`;}
+SCR.save=()=>`<div class="scr">${hdrHelp('chat')}<div class="body pad" style="gap:14px">
+ <div class="stack" style="gap:6px"><h1 class="h1" style="font-size:26px">Save to your Health Story?</h1><p class="p">Check each one. I only save what you say yes to.</p></div>
+ ${S.items.map(itemCard).join('')}
+ <p class="why center" style="font-size:14px">Up to 3 at a time. You can change these anytime in My Story.</p>
+</div><div class="foot"><button class="btn btn-p" data-a="saveDone">Done</button><button class="btn btn-s" data-a="saveSkip">Not now</button></div></div>`;
+
+SCR.stagecard=()=>{const st=stageInfo(),g=S.group;
+ let card;
+ if(isDoctorCard())card=`<section class="card att" style="gap:14px;padding:22px 20px"><div class="row" style="gap:10px"><span class="atti">${ic('user',20)}</span><h1 class="ct" style="font-size:24px">Worth a doctor's check</h1></div><p class="cp" style="font-size:16px">Changes like these before 40 are worth looking into. A simple blood test can help explain them. I won't guess a stage.</p><div class="g2"><button class="btn btn-p sm" data-a="tele">Book a teleconsult</button><button class="btn btn-s sm" data-a="sheet" data-v="change">Change my answers</button></div></section>`;
+ else card=`<section class="card" style="gap:16px;padding:22px 20px;border-radius:24px"><span class="lbl">Where you might be right now</span><div><h1 class="h1" style="font-size:30px;color:#14423E">${st.t}</h1>${st.sub?`<p class="p" style="color:#56615F;margin-top:4px">${st.sub}</p>`:''}</div>
+  ${st.tl!==undefined&&!S.special?`<div role="img" aria-label="Stage ${st.tl+1} of 5" class="stack" style="gap:8px"><div class="tl">${[0,1,2,3,4].map(i=>`<i class="${i===st.tl?'on':''}"></i>`).join('')}</div><div class="tlt">${['Before changes','Periods changing','Later in the transition','Last period','After'].map((l,i)=>`<span class="${i===st.tl?'on':''}">${l}</span>`).join('')}</div></div>`:''}
+  <div class="stack" style="gap:8px;border-top:1px solid #E7EBEA;padding-top:14px"><p class="p">${st.because||''}</p>${!S.special&&g!=='A'&&!S.told?'<p class="p">This is a natural stage, and many women notice changes like these.</p>':''}</div>
+  <div class="g2"><button class="btn btn-s sm" data-a="sheet" data-v="change">${ic('edit',18)}Change this</button><button class="btn btn-s sm" data-a="sheet" data-v="means">What this means</button></div></section>`;
+ const saved=S.consentB==='yes'&&S.saved.length;
+ return `<div class="scr"><header class="hdr"><span class="row why" style="gap:6px;font-weight:600;color:#14423E">${saved?ic('check',20)+'Saved to your Health Story':''}</span>${helpBtn()}</header><div class="body pad" style="justify-content:center;gap:14px">
+ ${S.redFlag?`<p class="note" style="background:#FBE9E4;color:#6E2414">Remember: please see a gynaecologist within 1–2 weeks about the bleeding. It will stay at the top of Home.</p>`:''}${card}</div>
+ <div class="foot"><button class="btn btn-p" data-a="toHome">Go to Home</button></div></div>`;};
+
+/* ---------- home ---------- */
+function stageCardH(){const st=stageInfo(),dz=S.discreet,c=cfg();
+ return `<section class="card stage${st.small?' sm':''}"><p class="lbl">${dz?'Where you are':'Where you might be right now'}</p>
+ <div class="sth"><h2 class="ct">${dz?st.d:st.t}${!dz&&st.sub?` <span class="sub">${st.sub}</span>`:''}</h2><button class="chg" data-a="sheet" data-v="change">Change this</button></div>
+ ${S.group==='D'&&!S.special&&!dz?`<div class="mb" role="img" aria-label="${S.months||'Under 12'} of 12 months without a period">${Array.from({length:12},(_,i)=>`<i class="${i<(S.months||6)?'on':''}"></i>`).join('')}</div>`:''}
+ ${st.days?`<div class="row" style="gap:10px"><div class="mb" style="flex:1;grid-template-columns:repeat(7,minmax(0,1fr))" role="img" aria-label="Day 2 of 7">${Array.from({length:7},(_,i)=>`<i class="${i<2?'on':''}"></i>`).join('')}</div><span style="font-size:14px;font-weight:600;color:#2F4A47">Day 2 of 7</span></div>`:''}
+ ${!dz&&st.because?`<p class="cp">${st.because}</p>`:''}
+ ${c.bleedLog&&!S.special?`<button class="go" data-a="sheet" data-v="bleed">${ic('plus',20)}${dz?'Add a note':'Log any bleeding'}</button>`:''}</section>`;}
+function doctorCard(){const dz=S.discreet;
+ return `<section class="card att"><div class="row" style="gap:10px"><span class="atti">${ic('user',20)}</span><h2 class="ct">${dz?'A check-up is worth booking':"Worth a doctor's check"}</h2></div><p class="cp">${dz?'Open My Story to see why.':'Changes like these before 40 are worth looking into. A simple blood test can help explain them.'}</p><div class="g2"><button class="btn btn-p sm" data-a="tele">Book a teleconsult</button><button class="btn btn-s sm" data-a="sheet" data-v="change">Change my answers</button></div></section>`;}
+function redCardH(){const dz=S.discreet;
+ return `<section class="rf"><div class="rfh"><span class="rfi">${ic('user',20)}</span><h2>${dz?'Please book a check-up within 1–2 weeks':'Please see a gynaecologist within 1–2 weeks'}</h2></div><div class="rfb"><p>${dz?'Open My Story to see why.':S.bleedLogged?`You logged ${esc(S.bleedLogged)}. After periods have stopped, any bleeding needs a doctor's check.`:"You told me about bleeding after your periods stopped. That needs a doctor's check."}</p><button class="btn btn-r sm" data-a="tele">Book a teleconsult</button><button class="tlink" style="align-self:flex-start" data-a="redSeen">I've seen a doctor</button></div></section>`;}
+function nextCard(nx){const dz=S.discreet,t=dz&&nx.d?nx.d:nx.t;S._nx=nx;
+ if(nx.btn)return `<section class="card${nx.strong?' strong':''}"><p class="lbl">Your next step</p><h2 class="ct">${t}</h2><button class="btn btn-p sm" data-a="${nx.act||'tele'}">${nx.btn}</button></section>`;
+ if(nx.btns)return `<section class="card"><p class="lbl">Your next step</p><h2 class="ct">${t}</h2><div class="g2"><button class="btn btn-s sm" data-a="startPlan">Start</button><button class="btn btn-s sm" data-a="else">Not now</button></div></section>`;
+ return `<section class="card"><p class="lbl">Your next step</p><h2 class="ct">${t}</h2>${nx.m?`<span class="meta">${nx.m}</span>`:''}<div class="g2"><button class="btn btn-p sm" data-a="read">Read now</button><button class="btn btn-s sm" data-a="else">Something else</button></div></section>`;}
+function cycleRow(){const c=cfg();if(S.special||!c.cycle)return '';return `<button class="go" data-a="tab" data-v="story">${S.discreet?'Tracker':'Cycle tracker'} · <b>${c.cycle}</b><span style="margin-left:auto">${ic('chev',20)}</span></button>`;}
+function checkCard(ck){const lbl=ck.label||'Quick check-in',dz=S.discreet,q=dz&&ck.d?ck.d:ck.q;S._ckq=q;
+ const bleedNote=S.special==='hormones'?`<button class="go" data-a="sheet" data-v="bleed">${ic('plus',20)}${dz?'Add a note':'Note any bleeding'} <span class="mut" style="font-weight:400">· kept for your doctor</span></button>`:'';
+ if(S.checkDone)return `<section class="card"><p class="lbl">${lbl}</p><div class="row" style="gap:8px;color:#1D5C57">${ic('check')}<b>Saved for today</b></div><p class="cp">${esc(q)} You said: <b>${esc(S.checkDone)}</b></p><button class="tlink" style="align-self:flex-start" data-a="checkUndo">Change answer</button>${cycleRow()}${bleedNote}</section>`;
+ const n=ck.o.length;
+ return `<section class="card"><p class="lbl">${lbl}</p><h2 class="ct">${q}</h2><div class="ansg" style="grid-template-columns:repeat(${n===4?2:n},minmax(0,1fr))">${ck.o.map(o=>`<button class="ans" data-a="check" data-v="${esc(o)}">${o}</button>`).join('')}</div>${cycleRow()}${bleedNote}</section>`;}
+function deviceCard(){S._ckq='How did your sleep feel?';
+ if(S.checkDone)return checkCard({q:'How did your sleep feel?',o:[]});
+ return `<section class="card strong"><p class="lbl">Quick check-in</p><div class="watch"><span class="oi" style="width:40px;height:40px">${ic('watch')}</span><div class="stack"><span class="why" style="font-size:14px">Your watch</span><b style="font-size:20px">6 h 10 min sleep</b></div></div><h2 class="ct">How did it feel?</h2><div class="ansg" style="grid-template-columns:repeat(4,minmax(0,1fr))">${['Rested','Okay','Tired','Very tired'].map(o=>`<button class="ans" style="padding:6px 2px" data-a="check" data-v="${o}">${o}</button>`).join('')}</div></section>`;}
+function patternCard(){const dz=S.discreet,n=S.checkins;
+ return `<section class="card"><h2 class="ct" style="font-size:17px">${n>=7?(dz?'Your first insight is ready':'Your first pattern is ready'):(dz?'Your first insight is on its way':'Your first pattern is on its way')}</h2><div class="row" style="gap:12px"><div class="pd" role="img" aria-label="${n} of 7 check-ins">${Array.from({length:7},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div><span class="why" style="font-weight:600">${n} of 7 check-ins</span></div></section>`;}
+function noticeCard(t){const dz=S.discreet;
+ return `<section class="card ntc"><p class="lbl">Something we noticed</p><h2 class="ct">${dz?'We spotted a pattern. Open My Story to see it.':t}</h2><p class="pnp">A pattern, not proof.</p></section>`;}
+function extraCard(x){const dz=S.discreet;S._extra=x;
+ return `<section class="card"><p class="lbl">For you</p><button class="art" data-a="readExtra"><span class="stack" style="gap:2px"><span class="ct" style="font-size:17px">${dz?x.d:x.t}</span><span class="meta" style="margin:0">${x.m}</span></span>${ic('chev')}</button></section>`;}
+function currentNext(){const c=cfg(),T=TOPICS[S.topic]||TOPICS.whats,later=S.later&&c.later;
+ if(S.altNext){const L=learnList();if(L.length){const k=L[(S.altNext-1)%L.length];return {...ARTS[k],m:'3-minute read',art:k};}}
+ if(isDoctorCard())return {t:"Note when your periods changed and how you've been feeling, to show your doctor.",btn:'Start my note',act:'note',d:'Make a note for your doctor visit.'};
+ if(c.next)return c.next;
+ if(later&&c.later.next)return c.later.next;
+ return T.next;}
+function homeCards(){const c=cfg(),T=TOPICS[S.topic]||TOPICS.whats,later=S.later&&c.later;const out=[];
+ if(S.redFlag)out.push(redCardH());
+ out.push(isDoctorCard()?doctorCard():stageCardH());
+ out.push(nextCard(currentNext()));
+ const ck=c.check||(later&&c.later.check)||T.check;
+ const useDevice=S.device.connected&&S.device.sleep&&ck===T.check&&T.sleep;
+ out.push(useDevice?deviceCard():checkCard(ck));
+ if(!S.redFlag){
+  if(c.extra)out.push(extraCard(c.extra));
+  else if(later&&c.later.notice)out.push(noticeCard(c.later.notice));
+  else out.push(patternCard());}
+ return out.join('');}
+const TAB={};
+TAB.home=homeCards;
+TAB.talk=()=>`${S.chat.length?S.chat.map(m=>m.k==='prog'?'':msg(m)).join(''):'<p class="bot">Ask me anything about this stage of life.</p>'}
+ <div class="inbar" style="margin-top:8px"><label for="tk" class="sr">Message</label><input id="tk" placeholder="Ask me anything…" data-enter="talkSend"><button class="ib send" aria-label="Send" data-a="talkSend">${ic('send')}</button></div>`;
+TAB.story=()=>{const dz=S.discreet,c=cfg(),g=S.group;
+ let cyc='';
+ if(!S.special&&g==='B')cyc=`<section class="card"><p class="lbl">${dz?'Tracker':'Cycle tracker'}</p><h2 class="ct">${dz?'Your last 3':'Your last 3 cycles'}</h2><div class="cyc"><span>24 days</span><span>41 days</span><span>35 days</span></div><p class="cp">We show your cycle lengths, not a predicted date. Cycles change a lot at this stage.</p><button class="btn btn-s sm" data-a="logPeriod">${dz?'Add a note':'Log a period'}</button></section>`;
+ if(!S.special&&g==='C')cyc=`<section class="card"><p class="lbl">${dz?'Tracker':'Cycle tracker'}</p><h2 class="ct">74 days ${dz?'since your last note':'since your last period'}</h2><p class="cp">${dz?'':'Long gaps can be followed by very heavy bleeding. Log it if it happens.'}</p><button class="btn btn-s sm" data-a="logPeriod">${dz?'Add a note':'Log a period'}</button></section>`;
+ if(!S.special&&g==='D')cyc=`<section class="card"><p class="lbl">${dz?'Tracker':'Cycle tracker'}</p><h2 class="ct">About ${S.months||'6'} months ${dz?'so far':'since your last period'}</h2><p class="cp">At 12 months I'll ask before updating anything.</p></section>`;
+ const savedList=S.consentB!=='yes'?'<p class="cp">Health notes are off, so nothing is saved. You can turn them on in Settings → Privacy.</p>':S.saved.length?`<ul class="slist">${S.saved.map(i=>`<li>${ic('check',18)}<span>${dz?'Private note':esc(i.t)}</span></li>`).join('')}</ul>`:'<p class="cp">Nothing saved yet.</p>';
+ const logs=S.log.length?`<ul class="slist">${S.log.map(l=>`<li>${ic('cal',18)}<span>Today · ${esc(l.q)} <b>${esc(l.a)}</b></span></li>`).join('')}</ul>`:'<p class="cp">Your check-ins will show here.</p>';
+ return `${S.redFlag&&dz?`<p class="note" style="background:#FBE9E4;color:#6E2414">${S.bleedLogged?`You logged ${esc(S.bleedLogged)}.`:'You told me about bleeding after your periods stopped.'} Please see a gynaecologist within 1–2 weeks.</p>`:''}
+ ${isDoctorCard()?doctorCard():stageCardH()}
+ <section class="card"><p class="lbl">Saved to your Health Story</p>${savedList}</section>${cyc}
+ <section class="card"><p class="lbl">Check-ins</p>${logs}</section>`;};
+TAB.learn=()=>{const dz=S.discreet,T=TOPICS[S.topic]||TOPICS.whats;
+ const rows=[{t:T.next.t,d:T.next.d,m:T.next.m,topic:true},...learnList().map(k=>({...ARTS[k],art:k}))];
+ return `<p class="cp">Picked for where you are now. Every article is reviewed by Dr. [Name], MD.</p>${rows.map((r,i)=>`<section class="card"><button class="art" data-a="readLearn" data-v="${i}"><span class="stack" style="gap:4px"><span class="ct" style="font-size:17px">${dz?r.d:r.t}</span>${r.m&&!dz?`<span class="why" style="font-size:14px">${r.m}</span>`:''}</span>${ic('chev')}</button></section>`).join('')}`;};
+function nav(){const t=[['home','Home','home'],['talk','Talk','chat'],['story','My Story','story'],['learn','Learn','learn']];
+ return `<nav class="tabs" aria-label="Main">${t.map(([k,l,i])=>`<button class="tab${S.tab===k?' on':''}" ${S.tab===k?'aria-current="page"':''} data-a="tab" data-v="${k}"><span class="pill">${ic(i)}</span>${l}</button>`).join('')}</nav>`;}
+SCR.home=()=>{const big=!S.special&&GROUPS[S.group]&&GROUPS[S.group].big;
+ const title={home:`${greet()}, ${esc(S.name)}`,talk:'Talk',story:'My Story',learn:'Learn'}[S.tab];
+ return `<div class="scr${big?' big':''}"><header class="hh"><div class="row sb"><div class="row" style="gap:8px"><button class="ib1${S.discreet?' on':''}" aria-pressed="${S.discreet}" aria-label="Discreet mode" data-a="discreet">${ic('eye',22)}</button><button class="ib1" aria-label="Profile and settings" data-a="sheet" data-v="settings">${ic('user',22)}</button></div>${helpBtn()}</div>
+ <h1 class="h1" style="font-size:26px">${title}</h1>${S.discreet?'<p class="dzl"><span></span>Discreet mode is on</p>':''}</header>
+ <div class="body hb" id="hb">${TAB[S.tab]()}</div>${nav()}</div>`;};
+
+/* ---------- sheets ---------- */
+const CHANGE=[['pre','Before the changes start'],['B','Periods changing'],['C','Later in the transition'],['D','Close to your last period'],['E','After your last period'],['notsure',"I'm not sure"]];
+function sheetHTML(){const k=S.sheet,dz=S.discreet;let h='';
+ if(k==='help')h=`<div class="row sb"><h2 class="h2">Need help now?</h2>${closeBtn()}</div>
+  <div class="emg"><b class="emh">In an emergency</b><div class="g2"><a class="call" href="tel:112">${ic('phone')}Call 112<small>Police or emergency</small></a><a class="call" href="tel:108">${ic('phone')}Call 108<small>Ambulance</small></a></div></div>
+  <a class="hrow" href="tel:14416"><span class="oi">${ic('chat')}</span><span class="stack" style="flex:1;gap:2px"><b>Talk to someone: Tele-MANAS</b><small class="mut">Call 14416 · free, any time, in your language</small></span>${ic('chev')}</a>
+  <button class="hrow" data-a="tele"><span class="oi">${ic('user')}</span><span class="stack" style="flex:1;gap:2px"><b>Talk to a gynaecologist</b><small class="mut">Book a video or phone consult</small></span>${ic('chev')}</button>
+  <div class="hrow" style="flex-direction:column;align-items:stretch;gap:10px;cursor:default"><button class="art" aria-expanded="${S.hosp}" data-a="hosp"><span class="row" style="gap:14px"><span class="oi" style="background:#FCF1DB;color:#7A5410">${ic('alert')}</span><b>Go to hospital today if…</b></span>${ic(S.hosp?'up':'down')}</button>
+  ${S.hosp?'<ul style="margin:0;padding-left:22px;font-size:15px;line-height:1.5;color:#3C4847"><li>[Urgent sign 1, clinical team to confirm]</li><li>[Urgent sign 2, clinical team to confirm]</li><li>[Urgent sign 3, clinical team to confirm]</li></ul>':''}</div>`;
+ else if(k==='change'){const cur=S.special==='notsure'?'notsure':S.group;
+  h=`<div class="row sb"><h2 class="h2">Where are you right now?</h2>${closeBtn()}</div><p class="p">Pick what fits best. Home changes straight away, and you can change it again anytime.</p>
+  <div class="stack" style="gap:10px">${CHANGE.map(([v,l])=>`<button class="st${cur===v?' on':''}" aria-pressed="${cur===v}" data-a="changeTo" data-v="${v}">${l}${cur===v?ic('check'):''}</button>`).join('')}</div>`;}
+ else if(k==='means'){const st=stageInfo()||{t:"Worth a doctor's check"};const key=S.special||S.group;
+  h=`<div class="row sb"><h2 class="h2">${st.t}</h2>${closeBtn()}</div><p class="p">${MEANS[key]||''}</p><p class="p">Every woman's path is different. This is a guide, not a diagnosis.</p><div class="rev">${ic('shield',16)}Reviewed by Dr. [Name], MD</div><button class="btn btn-p" data-a="closeSheet">Got it</button>`;}
+ else if(k==='notice')h=`<div class="row sb"><h2 class="h2">Full privacy notice</h2>${closeBtn()}</div>
+  <p class="p"><b>Who we are:</b> [Company name], the Data Fiduciary for NAARIZE.</p><p class="p"><b>What we collect, and why:</b> only what each consent card says, for the purpose it names.</p><p class="p"><b>Your rights:</b> see, correct or delete your data, and withdraw consent in Settings → Privacy. Withdrawing is as easy as agreeing.</p><p class="p"><b>Complaints:</b> [Grievance officer name and contact]. You can also go to the Data Protection Board of India.</p><p class="why">Notice version [v1.0]. Legal team to confirm full text.</p><button class="btn btn-p" data-a="closeSheet">Done</button>`;
+ else if(k==='pin')h=`<div class="row sb"><h2 class="h2">Set a PIN for NAARIZE</h2>${closeBtn()}</div><p class="why">Choose 4 numbers. Don't use your phone's PIN.</p><div class="pdots" aria-label="${S.pinBuf.length} of 4 entered">${dots(S.pinBuf.length)}</div>${keypad('pk')}`;
+ else if(k==='bleed'){const b=S.bleed,hormo=S.special==='hormones';
+  const opt=(f,v)=>`<button class="btn sm ${b[f]===v?'btn-p':'btn-s'}" aria-pressed="${b[f]===v}" data-a="bleedPick" data-v="${f}:${v}">${v}</button>`;
+  h=`<div class="row sb"><h2 class="h2">${dz?'Add a note':'Log any bleeding'}</h2>${closeBtn()}</div><p class="why">${hormo?"I'll keep this for your doctor, without guessing what it means.":'Only you can see this.'}</p>
+  <div class="stack" style="gap:8px"><span class="fl">When?</span><div class="g3">${opt('when','Today')}${opt('when','Yesterday')}${opt('when','This week')}</div></div>
+  <div class="stack" style="gap:8px"><span class="fl">How much?</span><div class="g3">${opt('amt','Spotting')}${opt('amt','Light')}${opt('amt','Heavy')}</div></div>
+  <button class="btn btn-p" data-a="bleedSave" ${b.when&&b.amt?'':'disabled'}>Save</button>`;}
+ else if(k==='settings'){const sw=(a,on,l,d)=>`<div class="swrow"><span class="stack"><span id="st-${a}">${l}</span>${d?`<small class="why" style="font-size:13px">${d}</small>`:''}</span><button class="sw" role="switch" aria-checked="${on}" aria-labelledby="st-${a}" data-a="${a}"></button></div>`;
+  h=`<div class="row sb"><h2 class="h2">Settings</h2>${closeBtn()}</div>
+  <div class="card" style="gap:0;padding:4px 16px">${sw('setDisc',S.discreet,'Discreet mode','Hides health words on Home')}${sw('setNotif',S.notifHidden,'Hide details in notifications','')}${sw('setLock',S.pin||S.bio,'App lock','PIN or fingerprint')}${sw('setDevice',S.device.connected,'Connected device',S.device.connected?esc(S.device.src||'Connected'):'Sleep and steps')}${sw('setNotes',S.consentB==='yes','Save health notes','Turning this off stops new saving')}</div>
+  <button class="hrow" style="min-height:56px" data-a="changeNumber">${ic('phone')}<span style="flex:1">Change mobile number</span>${ic('chev')}</button>`;}
+ else if(k==='article'){const a=S.article||{};
+  h=`<div class="row sb"><span class="lbl">${a.m||'3-minute read'}</span>${closeBtn()}</div><h2 class="h2">${dz&&a.d?a.d:a.t}</h2>
+  ${a.tips?a.tips.map((t,i)=>`<div class="tip"><span class="num">${i+1}</span><span>${t}</span></div>`).join(''):'<p class="p">[Article text, written by the content team and reviewed by the clinical team.]</p><p class="p">[Short paragraphs, plain words, one idea each.]</p>'}
+  <div class="rev">${ic('shield',16)}Reviewed by Dr. [Name], MD</div><button class="btn btn-p" data-a="closeSheet">Done</button>`;}
+ else if(k==='prompt12')h=`<span class="oi" style="width:56px;height:56px;border-radius:28px;margin-top:6px">${ic('cal',28)}</span><h2 class="h2">It's been about a year since your last period.</h2><p class="p" style="font-size:18px">Would you like to update your stage?</p><p class="why">If you do, Home will focus on life after your last period, and any bleeding from now on will be flagged for a doctor's check.</p><div class="g2"><button class="btn btn-s" data-a="yes12">Yes, update</button><button class="btn btn-s" data-a="closeSheet">Not yet</button></div><p class="why center" style="font-size:14px">You can change this anytime.</p>`;
+ return `<button class="ov" aria-label="Close" data-a="closeSheet"></button><section class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${h}</section>`;}
+function lockHTML(){return `<div class="lock" role="dialog" aria-label="NAARIZE is locked">${logo(48)}<h2 class="h2">Welcome back</h2>${S.pin?`<p class="why">Enter your NAARIZE PIN</p><div class="pdots">${dots(S.lockBuf.length)}</div>${keypad('lk')}`:''}${S.bio?`<button class="tlink" data-a="bioUnlock">${ic('finger')}Use fingerprint</button>`:''}</div>`;}
+
+/* ---------- render ---------- */
+function render(){
+ app.innerHTML=SCR[S.screen]()+(S.sheet?sheetHTML():'')+(S.locked?lockHTML():'');
+ const log=$('#log');if(log)log.scrollTop=log.scrollHeight;
+ if(S.screen==='about'){const y=$('#years'),on=y&&y.querySelector('.on'),target=on||y&&y.querySelector('[data-v="1980"]');if(y&&target)y.scrollTop=target.offsetTop-y.clientHeight/2+target.clientHeight/2;}
+ if(S.screen==='home'&&S.tab==='talk'){const hb=$('#hb');if(hb)hb.scrollTop=hb.scrollHeight;}
+ renderPanel();}
+let codeTimer,autoTimer;
+function startCode(){S.otp='';S.autoFilled=false;S.resendIn=30;clearInterval(codeTimer);clearTimeout(autoTimer);
+ codeTimer=setInterval(()=>{if(S.screen!=='code'){clearInterval(codeTimer);return;}if(S.resendIn>0){S.resendIn--;const r=$('#resend');if(r){r.disabled=S.resendIn>0;r.textContent=S.resendIn>0?`Resend code in 0:${String(S.resendIn).padStart(2,'0')}`:'Resend code';}}},1000);
+ autoTimer=setTimeout(()=>{if(S.screen==='code'&&!S.otp){S.otp='482913';S.autoFilled=true;render();}},1700);}
+function go(v){S.screen=v;S.sheet=null;if(v==='code')startCode();render();const b=app.querySelector('.body');if(b&&v!=='home')b.scrollTop=0;}
+function updOtp(){app.querySelectorAll('.ob').forEach((b,i)=>{b.textContent=S.otp[i]||'';b.classList.toggle('cur',i===S.otp.length);});const b=$('#codeBtn');if(b)b.disabled=S.otp.length!==6;const n=$('#autoNote');if(n)n.hidden=!S.autoFilled;}
+function guess(t){t=t.toLowerCase();
+ const R=[['sleep',/sleep|neend|wake|awake|insomnia/],['hot',/hot|flush|sweat|garmi|heat/],['mood',/tension|angry|anger|worry|mood|sad|cry|irrit|stress|anxious/],['tired',/tired|weak|energy|thak|fatigue|exhaust/],['aches',/ache|pain|joint|knee|back|dard|stiff/],['periods',/period|bleed|mens|cycle|spot|mc/]];
+ for(const [k,r] of R)if(r.test(t))return k;return 'whats';}
+function preset(k,keep){const P=PRESETS[k],kp={discreet:S.discreet,device:{...S.device}};S=fresh();
+ Object.assign(S,{name:P.name,year:P.year,phone:'9876543210',consentA:'yes',consentB:'yes',notifAsked:true,topic:P.topic,knows:P.knows,months:P.months||null,preset:k});
+ if(keep){S.discreet=kp.discreet;S.device=kp.device;}
+ startChat();autoRun(P.v);
+ S.items=buildItems();S.items.forEach(i=>{i.state='yes';});S.saved=S.items.slice();
+ computeGroup();S.later=!!P.later;S.checkins=P.later?5:2;S.screen='home';S.tab='home';}
+const PRESETS={
+ first:{l:'First visit',who:'Meera, 45',name:'Meera',year:1981,topic:'sleep',knows:'unsure',v:['changing','Most nights','Yes, often','A few months']},
+ A:{l:'A · Under 40',who:'Priya, 36',name:'Priya',year:1990,topic:'hot',knows:'unsure',v:['gaps','no','3–5','Yes, often','A few months'],later:true},
+ B:{l:'B · Early peri',who:'Meera, 44',name:'Meera',year:1982,topic:'sleep',knows:'unsure',v:['changing','Most nights','Sometimes','A few months'],later:true},
+ C:{l:'C · Late peri',who:'Kavita, 48',name:'Kavita',year:1978,topic:'hot',knows:'unsure',v:['gaps','3–5','Yes, often','A few months'],later:true},
+ D:{l:'D · Around menopause',who:'Sunita, 50',name:'Sunita',year:1976,topic:'mood',knows:'meno',v:['lt1','later','Tension or worry','A little','A few months'],later:true,months:10},
+ E:{l:'E · Early post',who:'Lakshmi, 53',name:'Lakshmi',year:1973,topic:'aches',knows:'unsure',v:['stopped','1-2','no','Knees','Yes','A year or more'],later:true},
+ F:{l:'F · Later post',who:'Shanta, 60',name:'Shanta',year:1966,topic:'tired',knows:'unsure',v:['stopped','5+','no','Most days','Sometimes','A year or more'],later:true},
+ hormones:{l:'On pills, coil or HRT',who:'Anjali, 47',name:'Anjali',year:1979,topic:'mood',knows:'unsure',v:['hormones','Tension or worry','A little','A few months']},
+ surgery:{l:'Ovaries removed',who:'Rekha, 44',name:'Rekha',year:1982,topic:'hot',knows:'unsure',v:['surgery','ovaries','3–5','Sometimes','A few months']},
+ notsure:{l:'Not sure',who:'Fatima, 46',name:'Fatima',year:1980,topic:'whats',knows:null,v:['unsure','Sleep changes','A little','A few months']},
+ red:{l:'Red flag on top',who:'Lakshmi, 53',name:'Lakshmi',year:1973,topic:'aches',knows:'unsure',v:['stopped','1-2','yes','go','Knees','Yes','A year or more'],later:true}
+};
+
+/* ---------- actions ---------- */
+const ACT={
+ go:v=>go(v),
+ restart(){S=fresh();go('welcome');},
+ samplePhone(){S.phone='98765 43210';render();},
+ sendCode(){if(digits(S.phone).length===10)go('code');},
+ codeNext(){if(S.otp.length===6)go('about');},
+ resend(){S.resendIn=30;toast('New code sent. It only says “Your code is …”.');startCodeTimerOnly();},
+ year(v){S.year=+v;render();},
+ aboutNext(){if(!S.name.trim()||!S.year)return;if(age()<18){S.name='';S.year=null;go('under18');}else go('consent');},
+ consent(v){const [k,a]=v.split(':');S['consent'+k]=a;render();},
+ listen(){toast('Reading the notice aloud (works in the app).');},
+ sheet(v){S.sheet=v;if(v==='pin')S.pinBuf='';if(v==='bleed')S.bleed={when:null,amt:null};render();},
+ closeSheet(){S.sheet=null;render();},
+ bio(){S.bio=!S.bio;S.pinSkip=false;render();if(S.bio)toast('Fingerprint on. A PIN is safer if others have a fingerprint saved here.');},
+ pinSkip(){S.pinSkip=true;S.pin=false;S.bio=false;render();},
+ pk(v){if(v==='del')S.pinBuf=S.pinBuf.slice(0,-1);else if(S.pinBuf.length<4)S.pinBuf+=v;
+  if(S.pinBuf.length===4){S.pin=true;S.pinSkip=false;S.sheet=null;S.pinBuf='';render();toast('PIN set. NAARIZE locks about a minute after you leave it.');}else render();},
+ notif(v){S.notifAsked=true;S.notifHidden=v==='on';render();},
+ disc(v){S.discAsked=true;S.discreet=v==='on';render();},
+ src(v){S.device.src=v;render();},
+ sw(v){S.device[v]=!S.device[v];render();},
+ connect(){S.device.connected=true;toast('Connected. Your sleep check-ins will fill in for you.');go('brings');},
+ help(){S.sheet='help';S.hosp=false;render();},
+ hosp(){S.hosp=!S.hosp;render();},
+ tele(){toast('Teleconsult booking opens here. Not part of this prototype.');},
+ more(){S.moreOpen=!S.moreOpen;render();},
+ topic(v){S.topic=v;S.reflect=null;if(v==='whats'){S.knows=null;startChat();render();}else go('stagek');},
+ own(){const t=(S.own||'').trim();if(!t){toast('Type a few words first, or pick a topic.');return;}S.reflect=guess(t);render();},
+ mic(){toast('Voice input works in the app. Type here for now.');},
+ reflectYes(){ACT.topic(S.reflect);},
+ reflectNo(){S.reflect=null;render();},
+ knows(v){S.knows=v;startChat();render();},
+ ans(v){answer(+v);},
+ chatSend(){const i=$('#ci'),t=i&&i.value.trim();if(!t)return;me(esc(t));bot(S.q?"Thanks, I've kept your words. To keep this short, please tap one of the answers above, or Skip.":"Thanks, I've noted that.");render();},
+ item(v){const [i,s]=v.split(':');S.items[+i].state=s;render();},
+ itemEdit(v){const it=S.items[+v];it.editing=true;it.draft=it.t;render();const el=$('#ed'+v);if(el)el.focus();},
+ itemEditOk(v){const it=S.items[+v];it.t=(it.draft||'').trim()||it.t;it.editing=false;it.state='yes';render();},
+ itemEditCancel(v){S.items[+v].editing=false;render();},
+ saveDone(){S.saved=S.items.filter(i=>i.state==='yes');computeGroup();go('stagecard');toast(S.saved.length?`Saved ${S.saved.length} to your Health Story.`:'Nothing saved.');},
+ saveSkip(){S.saved=[];computeGroup();go('stagecard');},
+ changeTo(v){const ag=age();S.special=v==='notsure'?'notsure':null;S.group=v==='notsure'?null:v;S.told=false;S.diag=false;S.corrected=true;S.altNext=0;S.checkDone=null;S.sheet=null;
+  if(ag!==null&&ag<40&&S.group&&S.group!=='pre'){S.group='A';render();toast("Updated. Before 40, the doctor's check stays at the top.");}
+  else{render();toast('Updated. Home now matches what you told us.');}},
+ toHome(){S.screen='home';S.tab='home';S.sheet=null;render();},
+ tab(v){S.tab=v;render();const hb=$('#hb');if(hb&&v!=='talk')hb.scrollTop=0;},
+ discreet(){S.discreet=!S.discreet;render();toast(S.discreet?'Discreet mode on. Health words are hidden on Home.':'Discreet mode off.');},
+ read(){const nx=S._nx||{};const T=TOPICS[S.topic]||TOPICS.whats;S.article={...nx,tips:nx===T.next?T.tips:null};S.sheet='article';render();},
+ readExtra(){S.article={...S._extra};S.sheet='article';render();},
+ readLearn(v){const T=TOPICS[S.topic]||TOPICS.whats;const i=+v;S.article=i===0?{...T.next,tips:T.tips}:{...ARTS[learnList()[i-1]],m:'3-minute read'};S.sheet='article';render();},
+ else(){S.altNext=(S.altNext||0)+1;render();toast('Here is something else for you.');},
+ startPlan(){toast("Great. I'll check in gently this month.");},
+ note(){toast('Note started in My Story. Add dates and how you felt.');},
+ check(v){S.checkDone=v;S.checkins=Math.min(7,S.checkins+1);S.log.unshift({q:S._ckq,a:v});render();toast('Saved. Thanks for checking in.');},
+ checkUndo(){S.checkDone=null;S.checkins=Math.max(1,S.checkins-1);S.log.shift();render();},
+ bleedPick(v){const [f,x]=v.split(':');S.bleed[f]=x;render();},
+ bleedSave(){const b=S.bleed,txt=`${b.amt.toLowerCase()} ${b.when==='This week'?'this week':b.when.toLowerCase()}`;S.sheet=null;S.log.unshift({q:S.discreet?'Note':'Bleeding',a:`${b.amt}, ${b.when.toLowerCase()}`});
+  if(S.special==='hormones'){render();toast('Noted for your doctor.');return;}
+  S.redFlag=true;S.bleedLogged=txt;S.tab='home';render();toast('Saved. Please see the note at the top of Home.');},
+ redSeen(){S.redFlag=false;S.bleedLogged=null;render();toast("Thanks for letting me know. I've noted it in My Story.");},
+ logPeriod(){toast('Period logged. Your cycle lengths update in My Story.');},
+ talkSend(){const i=$('#tk'),t=i&&i.value.trim();if(!t)return;me(esc(t));bot("Thanks for telling me. In the full app I'd answer here. This prototype covers the first chat only.");render();},
+ yes12(){S.group='E';S.months=12;S.because12="It's been about a year since your last period.";S.told=false;S.corrected=false;S.sheet=null;S.checkDone=null;render();toast('Updated. Any bleeding from now on will be flagged for a doctor.');},
+ setDisc(){S.discreet=!S.discreet;render();},
+ setNotif(){S.notifHidden=!S.notifHidden;render();},
+ setLock(){if(S.pin||S.bio){S.pin=false;S.bio=false;render();toast('App lock off.');}else{S.sheet='pin';S.pinBuf='';render();}},
+ setDevice(){const d=S.device;if(d.connected){d.connected=false;render();toast('Disconnected. Nothing more will be read.');}else{d.connected=true;d.sleep=true;d.src=d.src||'Google Health Connect';render();toast('Connected: sleep only. You can add steps later.');}},
+ setNotes(){S.consentB=S.consentB==='yes'?'no':'yes';render();toast(S.consentB==='yes'?'Health notes on.':'Health notes off. Nothing new will be saved.');},
+ changeNumber(){toast("For safety, I'll ask for your PIN and a new code first.");},
+ lk(v){if(v==='del')S.lockBuf=S.lockBuf.slice(0,-1);else if(S.lockBuf.length<4)S.lockBuf+=v;if(S.lockBuf.length===4){S.locked=false;S.lockBuf='';}render();},
+ bioUnlock(){S.locked=false;S.lockBuf='';render();}
+};
+function startCodeTimerOnly(){clearInterval(codeTimer);codeTimer=setInterval(()=>{if(S.screen!=='code'){clearInterval(codeTimer);return;}if(S.resendIn>0){S.resendIn--;const r=$('#resend');if(r){r.disabled=S.resendIn>0;r.textContent=S.resendIn>0?`Resend code in 0:${String(S.resendIn).padStart(2,'0')}`:'Resend code';}}},1000);const r=$('#resend');if(r){r.disabled=true;}}
+
+screenEl.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||el.disabled)return;const f=ACT[el.dataset.a];if(f){if(el.tagName==='A'&&el.getAttribute('href')==='#')e.preventDefault();f(el.dataset.v,el);}});
+app.addEventListener('input',e=>{const t=e.target,k=t.dataset.i;if(!k)return;
+ if(k==='phone'){S.phone=t.value;const b=$('#sendBtn');if(b)b.disabled=digits(S.phone).length!==10;}
+ else if(k==='otp'){const v=digits(t.value).slice(0,6);t.value=v;S.otp=v;S.autoFilled=false;updOtp();}
+ else if(k==='name'){S.name=t.value;const b=$('#aboutBtn');if(b)b.disabled=!(S.name.trim()&&S.year);}
+ else if(k==='own'){S.own=t.value;}
+ else if(k==='edit'){S.items[+t.dataset.n].draft=t.value;}});
+app.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t.dataset&&t.dataset.enter){e.preventDefault();ACT[t.dataset.enter](t.value,t);}
+ if(e.key==='Escape'&&S.sheet){S.sheet=null;render();}});
+
+/* ---------- control rail ---------- */
+const JUMPS=[['welcome','Welcome'],['phone','Sign in'],['about','About you'],['consent','Consent'],['private','Keep private'],['device','Connect a device'],['brings','What brings you'],['stagek','Your stage'],['chat','First chat'],['save','Save'],['stagecard','Stage card'],['home','Home']];
+const curJump=k=>S.screen===k||(k==='phone'&&S.screen==='code')||(k==='about'&&S.screen==='under18');
+function jump(v){S.locked=false;S.sheet=null;
+ if(['welcome','phone','about','consent','private','device'].includes(v)){go(v);return;}
+ if(!S.name)S.name='Meera';if(!S.year)S.year=1981;if(!S.consentA){S.consentA='yes';S.consentB='yes';}
+ if(v==='brings'){go('brings');return;}
+ if(v==='stagek'){S.topic=S.topic||'sleep';go('stagek');return;}
+ if(v==='chat'){S.topic=S.topic||'sleep';if(S.knows===undefined)S.knows='unsure';startChat();render();return;}
+ if(v==='save'){preset('first',true);S.items.forEach(i=>{i.state=null;});S.saved=[];go('save');return;}
+ if(v==='stagecard'){preset('first',true);go('stagecard');return;}
+ if(v==='home'){if(!S.group&&!S.special)preset('first',true);S.screen='home';S.tab='home';render();}}
+const tg=(p,on,l,dis)=>`<button class="trow" role="switch" aria-checked="${!!on}" data-p="${p}" ${dis?'disabled':''}><span>${l}</span><span class="psw"></span></button>`;
+function renderPanel(){const view=S.special?SPL[S.special]:S.group?GL[S.group]:'Not set yet';
+ panel.innerHTML=`<div><h1>NAARIZE prototype</h1><p class="lede">Tap through onboarding to Home the way she would. Her answers change the path, the stage card and what Home shows.</p></div>
+ <section><h2 class="ph">Jump to a screen</h2><div class="plist">${JUMPS.map(([k,l])=>`<button class="pb${curJump(k)?' on':''}" data-p="jump" data-v="${k}" ${curJump(k)?'aria-current="true"':''}>${l}</button>`).join('')}</div></section>
+ <section><h2 class="ph">Open Home as</h2><div class="pgrid">${Object.entries(PRESETS).map(([k,P])=>`<button class="pb${S.preset===k&&S.screen==='home'?' on':''}" data-p="preset" data-v="${k}">${P.l}<small>${P.who}</small></button>`).join('')}</div></section>
+ <section><h2 class="ph">Try on Home</h2><div class="ptog">${tg('later',S.later,'A later day (patterns noticed)',S.screen!=='home')}${tg('discreet',S.discreet,'Discreet mode')}${tg('device',S.device.connected,'Watch connected (sleep)')}</div>
+ <div class="pact" style="margin-top:8px"><button class="pb" data-p="prompt12" ${S.screen==='home'&&S.group==='D'&&!S.special?'':'disabled'}>Show 12-month prompt</button><button class="pb" data-p="lock">Leave the app</button><button class="pb" data-p="restart">Restart</button></div></section>
+ <section><h2 class="ph">Her answers so far</h2><dl class="pstate"><dt>Name</dt><dd>${esc(S.name)||'–'}</dd><dt>Age</dt><dd>${age()??'–'}</dd><dt>Topic</dt><dd>${S.topic?esc(TOPICS[S.topic].chip):'–'}</dd><dt>Stage</dt><dd>${S.knows===undefined?'–':S.knows===null?'Skipped (not sure path)':esc(KNOWL[S.knows])}</dd><dt>Home</dt><dd>${view}</dd><dt>Red flag</dt><dd>${S.redFlag?'Yes, shown at top':'No'}</dd></dl></section>
+ <p class="pnote">Built from the NAARIZE Designer Manual (3 Nov 2026). Tip copy, red-flag wording and the hospital list need clinical review. Bracketed text is a placeholder.</p>`;}
+panel.addEventListener('click',e=>{const el=e.target.closest('[data-p]');if(!el||el.disabled)return;const p=el.dataset.p,v=el.dataset.v;
+ if(p==='jump')jump(v);
+ else if(p==='preset'){preset(v,true);render();}
+ else if(p==='later'){S.later=!S.later;S.checkDone=null;S.altNext=0;render();}
+ else if(p==='discreet'){S.discreet=!S.discreet;render();}
+ else if(p==='device'){const d=S.device;d.connected=!d.connected;if(d.connected){d.sleep=true;d.src=d.src||'Google Health Connect';}S.checkDone=null;render();}
+ else if(p==='prompt12'){S.sheet='prompt12';render();}
+ else if(p==='lock'){if(S.pin||S.bio){S.sheet=null;S.locked=true;S.lockBuf='';render();}else toast('Set a PIN in “Keep private” first. Without one, NAARIZE opens straight away.');}
+ else if(p==='restart'){clearInterval(codeTimer);S=fresh();go('welcome');}});
+
+/* ---------- fit the phone to the window ---------- */
+function fit(){const narrow=innerWidth<900;const w=narrow?document.documentElement.clientWidth-32:innerWidth-32-28-380;const h=narrow?Infinity:innerHeight-48;
+ const s=Math.max(.5,Math.min(1,w/418,h/872));document.documentElement.style.setProperty('--s',s.toFixed(3));}
+addEventListener('resize',fit);fit();
+render();
+</script>
+
+</body>
+</html>
